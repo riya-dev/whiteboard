@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,8 @@ import { getDayName, getDayNumber, isToday } from "@/lib/date-utils"
 
 interface DailyGoal {
   id: string
+  user_id?: string
+  goal_date: string
   goal_text: string
   is_completed: boolean
   goal_order: number
@@ -18,19 +20,20 @@ interface DayCardProps {
   date: Date
   dateStr: string
   goals: DailyGoal[]
+  booster: boolean
+  xr: boolean
   onToggleGoal: (goal: DailyGoal) => void
   onAddGoal: (goalText: string) => void
   onUpdateGoal: (goalId: string, goalText: string) => void
   onDeleteGoal: (goal: DailyGoal) => void
+  onToggleBooster: () => void
+  onToggleXr: () => void
 }
 
-export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdateGoal, onDeleteGoal }: DayCardProps) {
+export function DayCard({ date, dateStr, goals, booster, xr, onToggleGoal, onAddGoal, onUpdateGoal, onDeleteGoal, onToggleBooster, onToggleXr }: DayCardProps) {
   const [newGoalText, setNewGoalText] = useState("")
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
   const [editGoalText, setEditGoalText] = useState("")
-  const [booster, setBooster] = useState(false)
-  const [xr, setXr] = useState(false)
-  const [pills, setPills] = useState(false)
   const today = isToday(date)
   const dayName = getDayName(date)
   const dayNum = getDayNumber(date)
@@ -72,42 +75,6 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
     }
   }
 
-  // Persist booster/xr/pills flags per day using localStorage
-  function loadFlags() {
-    try {
-      const raw = localStorage.getItem(`daily_flags_${dateStr}`)
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        setBooster(!!parsed.booster)
-        setXr(!!parsed.xr)
-        setPills(!!parsed.pills)
-      } else {
-        setBooster(false)
-        setXr(false)
-        setPills(false)
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  function saveFlags(next: { booster?: boolean; xr?: boolean; pills?: boolean }) {
-    try {
-      const current = { booster, xr, pills }
-      const merged = { ...current, ...next }
-      localStorage.setItem(`daily_flags_${dateStr}`, JSON.stringify(merged))
-      setBooster(!!merged.booster)
-      setXr(!!merged.xr)
-      setPills(!!merged.pills)
-    } catch {
-      // ignore
-    }
-  }
-
-  // Load flags when date changes
-  useEffect(() => {
-    loadFlags()
-  }, [dateStr])
 
   return (
     <Card
@@ -118,7 +85,7 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
         {/* Booster button (circle) */}
         <button
           type="button"
-          onClick={() => saveFlags({ booster: !booster })}
+          onClick={onToggleBooster}
           className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors cursor-pointer ${
             booster
               ? "border-primary bg-primary/15"
@@ -140,7 +107,7 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
         {/* XR button (pill shape) */}
         <button
           type="button"
-          onClick={() => saveFlags({ xr: !xr })}
+          onClick={onToggleXr}
           className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors cursor-pointer ${
             xr
               ? "border-primary bg-primary/15"
@@ -157,29 +124,6 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
             className={xr ? "text-primary" : "text-muted-foreground"}
           >
             <rect x="5" y="9" width="14" height="6" rx="3" />
-          </svg>
-        </button>
-        {/* Pills button (two circles) */}
-        <button
-          type="button"
-          onClick={() => saveFlags({ pills: !pills })}
-          className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors cursor-pointer ${
-            pills
-              ? "border-primary bg-primary/15"
-              : "border-border bg-background/60 hover:bg-accent/30"
-          }`}
-          aria-pressed={pills}
-          aria-label="Toggle pills"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className={pills ? "text-primary" : "text-muted-foreground"}
-          >
-            <circle cx="9" cy="12" r="3" />
-            <circle cx="15" cy="12" r="3" />
           </svg>
         </button>
       </div>

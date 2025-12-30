@@ -54,6 +54,14 @@ interface DisciplineTracking {
   set_goals_tomorrow: boolean
 }
 
+interface DailyFlag {
+  id?: string
+  user_id?: string
+  flag_date: string
+  booster: boolean
+  xr: boolean
+}
+
 interface CountdownEvent {
   id: string
   user_id: string
@@ -71,6 +79,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
   // State
   const [dailyGoals, setDailyGoals] = useState<Record<string, DailyGoal[]>>({})
+  const [dailyFlags, setDailyFlags] = useState<Record<string, { booster: boolean; xr: boolean }>>({})
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([])
   const [weeklyGoalsCadence, setWeeklyGoalsCadence] = useState<"weekly" | "biweekly">("weekly")
   const [thisWeekItems, setThisWeekItems] = useState<LookaheadItem[]>([])
@@ -161,6 +170,19 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
       .in("track_date", weekDateStrs)
 
     setDisciplineTracking(disciplineData || [])
+
+    // Load daily flags for this week
+    const { data: flagsData } = await supabase
+      .from("daily_flags")
+      .select("*")
+      .in("flag_date", weekDateStrs)
+
+    const flagsByDate: Record<string, { booster: boolean; xr: boolean }> = {}
+    weekDateStrs.forEach((date) => {
+      const flag = flagsData?.find((f) => f.flag_date === date)
+      flagsByDate[date] = flag ? { booster: flag.booster, xr: flag.xr } : { booster: false, xr: false }
+    })
+    setDailyFlags(flagsByDate)
 
     // Load all data for heatmaps (365 days)
     const last365Days = getLast365Days()
@@ -482,6 +504,46 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     }
   }
 
+  // ===== DAILY FLAGS HANDLERS =====
+
+  async function handleToggleFlag(dateStr: string, flagType: "booster" | "xr") {
+    const existing = dailyFlags[dateStr] || { booster: false, xr: false }
+    const newValue = !existing[flagType]
+
+    // Check if record exists in database
+    const { data: existingFlag } = await supabase
+      .from("daily_flags")
+      .select("*")
+      .eq("flag_date", dateStr)
+      .eq("user_id", user.id)
+      .single()
+
+    if (existingFlag) {
+      // Update existing record
+      await supabase
+        .from("daily_flags")
+        .update({ [flagType]: newValue })
+        .eq("flag_date", dateStr)
+        .eq("user_id", user.id)
+    } else {
+      // Insert new record
+      await supabase
+        .from("daily_flags")
+        .insert({
+          user_id: user.id,
+          flag_date: dateStr,
+          booster: flagType === "booster" ? newValue : false,
+          xr: flagType === "xr" ? newValue : false,
+        })
+    }
+
+    // Update local state
+    setDailyFlags((prev) => ({
+      ...prev,
+      [dateStr]: { ...existing, [flagType]: newValue },
+    }))
+  }
+
   // ===== COUNTDOWN EVENT HANDLERS =====
 
   async function handleSaveCountdownEvent(eventName: string, targetDate: string) {
@@ -622,10 +684,12 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
                 <DailyGrid
                   weekDates={weekDates}
                   dailyGoals={dailyGoals}
+                  dailyFlags={dailyFlags}
                   onToggleGoal={handleToggleDailyGoal}
                   onAddGoal={handleAddDailyGoal}
                   onUpdateGoal={handleUpdateDailyGoal}
                   onDeleteGoal={handleDeleteDailyGoal}
+                  onToggleFlag={handleToggleFlag}
                 />
               </div>
             </div>
