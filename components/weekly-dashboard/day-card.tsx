@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -28,6 +28,8 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
   const [newGoalText, setNewGoalText] = useState("")
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
   const [editGoalText, setEditGoalText] = useState("")
+  const [booster, setBooster] = useState(false)
+  const [xr, setXr] = useState(false)
   const today = isToday(date)
   const dayName = getDayName(date)
   const dayNum = getDayNumber(date)
@@ -69,14 +71,83 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
     }
   }
 
+  // Persist booster/xr flags per day using localStorage
+  function loadFlags() {
+    try {
+      const raw = localStorage.getItem(`daily_flags_${dateStr}`)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        setBooster(!!parsed.booster)
+        setXr(!!parsed.xr)
+      } else {
+        setBooster(false)
+        setXr(false)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  function saveFlags(next: { booster?: boolean; xr?: boolean }) {
+    try {
+      const current = { booster, xr }
+      const merged = { ...current, ...next }
+      localStorage.setItem(`daily_flags_${dateStr}`, JSON.stringify(merged))
+      setBooster(!!merged.booster)
+      setXr(!!merged.xr)
+    } catch {
+      // ignore
+    }
+  }
+
+  // Load flags when date changes
+  useEffect(() => {
+    loadFlags()
+  }, [dateStr])
+
   return (
-    <Card
-      className={`p-5 transition-all duration-300 ${
-        today
-          ? "border-primary/40 bg-gradient-to-br from-primary/8 via-accent/8 to-primary/5 shadow-lg shadow-primary/20 ring-2 ring-primary/20"
-          : "border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border"
-      }`}
-    >
+    <div className={today ? "relative" : undefined}>
+      {today && (
+        <div className="pointer-events-none absolute -inset-1 rounded-xl bg-primary/25 blur-lg" aria-hidden />
+      )}
+      <Card
+        className={`relative p-5 transition-all duration-300 ${
+          today
+            ? "border-primary/40 bg-gradient-to-br from-primary/8 via-accent/8 to-primary/5 shadow-lg shadow-primary/20 ring-2 ring-primary/20"
+            : "border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border"
+        }`}
+      >
+        {/* Top-right quick flags */}
+        <div className="absolute top-2 right-2 flex items-center gap-1.5">
+          {/* Booster button (circle) */}
+          <button
+            type="button"
+            onClick={() => saveFlags({ booster: !booster })}
+            title="Mark booster"
+            className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors ${
+              booster ? "border-primary bg-primary/15" : "border-border bg-background/60 hover:bg-accent/30"
+            }`}
+            aria-pressed={booster}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className={booster ? "text-primary" : "text-muted-foreground"}>
+              <circle cx="12" cy="12" r="6" />
+            </svg>
+          </button>
+          {/* XR button (pill) */}
+          <button
+            type="button"
+            onClick={() => saveFlags({ xr: !xr })}
+            title="Mark XR"
+            className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors ${
+              xr ? "border-primary bg-primary/15" : "border-border bg-background/60 hover:bg-accent/30"
+            }`}
+            aria-pressed={xr}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className={xr ? "text-primary" : "text-muted-foreground"}>
+              <rect x="5" y="9" width="14" height="6" rx="3" />
+            </svg>
+          </button>
+        </div>
       {/* Day Header */}
       <div className="mb-5 text-center">
         <div className="flex items-center justify-center gap-1.5 mb-2">
@@ -144,6 +215,7 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
           className="inline-add-input text-sm mt-1"
         />
       </div>
-    </Card>
+      </Card>
+    </div>
   )
 }

@@ -536,9 +536,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
             {/* Top Info Bar */}
             <div className="flex items-center justify-between gap-4">
-              {/* Left: Decorative Bow */}
-              <div className="flex items-center justify-center w-14 h-14 border border-border rounded-sm" aria-hidden />
-
               {/* Center: Week Date (full available width) */}
               <div className="flex-1">
                 <Card className="w-full h-14 flex items-center bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
