@@ -38,6 +38,25 @@
   --sidebar-accent-foreground: oklch(0.3 0.01 30);
   --sidebar-border: oklch(0.93 0.005 50);
   --sidebar-ring: oklch(0.75 0.12 10);
+
+  /* Heatmap Colors - Goals (Pink shades) */
+  --heatmap-goals-0: oklch(0.96 0.005 350); /* Nearly white pink */
+  --heatmap-goals-1: oklch(0.88 0.05 350); /* Very light pink */
+  --heatmap-goals-2: oklch(0.8 0.08 350); /* Light pink */
+  --heatmap-goals-3: oklch(0.72 0.11 350); /* Medium pink */
+  --heatmap-goals-4: oklch(0.65 0.14 350); /* Deep pink */
+
+  /* Heatmap Colors - Discipline (Rose/Mauve shades) */
+  --heatmap-discipline-0: oklch(0.96 0.005 340); /* Nearly white rose */
+  --heatmap-discipline-1: oklch(0.85 0.06 340); /* Very light mauve */
+  --heatmap-discipline-2: oklch(0.78 0.09 340); /* Light rose */
+  --heatmap-discipline-3: oklch(0.7 0.12 340); /* Medium mauve */
+  --heatmap-discipline-4: oklch(0.62 0.15 340); /* Deep rose */
+
+  /* Week Picker Pill Styling */
+  --week-picker-bg: oklch(0.98 0.008 350);
+  --week-picker-border: oklch(0.90 0.01 350);
+  --week-picker-hover: oklch(0.96 0.012 350);
 }
 
 .dark {
@@ -74,6 +93,19 @@
   --sidebar-accent-foreground: oklch(0.97 0.005 50);
   --sidebar-border: oklch(0.25 0.01 30);
   --sidebar-ring: oklch(0.72 0.1 350);
+
+  /* Heatmap Colors - Dark Mode */
+  --heatmap-goals-0: oklch(0.25 0.01 350);
+  --heatmap-goals-1: oklch(0.35 0.08 350);
+  --heatmap-goals-2: oklch(0.45 0.11 350);
+  --heatmap-goals-3: oklch(0.55 0.13 350);
+  --heatmap-goals-4: oklch(0.65 0.15 350);
+
+  --heatmap-discipline-0: oklch(0.25 0.01 340);
+  --heatmap-discipline-1: oklch(0.35 0.08 340);
+  --heatmap-discipline-2: oklch(0.45 0.11 340);
+  --heatmap-discipline-3: oklch(0.55 0.13 340);
+  --heatmap-discipline-4: oklch(0.65 0.15 340);
 }
 
 @theme inline {
@@ -123,5 +155,169 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ====================================== */
+/* CUSTOM DASHBOARD STYLES */
+/* ====================================== */
+
+/* Heatmap Grid - GitHub style */
+.heatmap-grid {
+  display: flex;
+  gap: 3px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.heatmap-week {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.heatmap-day {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+  cursor: pointer;
+}
+
+.heatmap-day:hover {
+  transform: scale(1.3);
+  outline: 1px solid var(--border);
+  z-index: 10;
+}
+
+/* Daily Grid Layout - 2-2-3 pattern */
+.daily-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Row 1: Tuesday, Wednesday */
+.daily-grid > *:nth-child(1),
+.daily-grid > *:nth-child(2) {
+  grid-column: span 1;
+}
+
+/* Row 2: Thursday, Friday */
+.daily-grid > *:nth-child(3),
+.daily-grid > *:nth-child(4) {
+  grid-column: span 1;
+}
+
+/* Row 3: Saturday, Sunday, Monday */
+.daily-grid > *:nth-child(5),
+.daily-grid > *:nth-child(6) {
+  grid-column: span 1;
+}
+
+.daily-grid > *:nth-child(7) {
+  grid-column: span 2; /* Monday spans both columns */
+}
+
+/* Mobile: Single column */
+@media (max-width: 768px) {
+  .daily-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-grid > * {
+    grid-column: span 1 !important;
+  }
+}
+
+/* Week Picker Pill */
+.week-picker-pill {
+  background-color: var(--week-picker-bg);
+  border: 1px solid var(--week-picker-border);
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.week-picker-pill:hover {
+  background-color: var(--week-picker-hover);
+  border-color: var(--primary);
+}
+
+.week-picker-pill:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Discipline Row Layout */
+.discipline-day-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.discipline-day-row:last-child {
+  border-bottom: none;
+}
+
+.discipline-day-label {
+  min-width: 3rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  letter-spacing: 0.025em;
+  font-weight: 500;
+}
+
+/* Inline Add Input Styling */
+.inline-add-input {
+  border: 1px dashed var(--border);
+  background: transparent;
+  transition: border-color 0.15s ease, border-style 0.15s ease;
+}
+
+.inline-add-input:focus {
+  border-style: solid;
+  border-color: var(--primary);
+  outline: none;
+}
+
+.inline-add-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+/* Collapsible Learnings Section */
+.learnings-collapsed {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.learnings-collapsed:hover {
+  opacity: 1;
+}
+
+/* Sidebar on Desktop */
+@media (min-width: 769px) {
+  .weekly-sidebar {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+  }
+}
+
+/* Mobile Sidebar Stack */
+@media (max-width: 768px) {
+  .mobile-sidebar-stack {
+    order: -1; /* Show before main content */
   }
 }
