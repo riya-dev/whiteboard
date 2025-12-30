@@ -10,14 +10,7 @@ interface HeatmapProps {
 }
 
 export function Heatmap({ title, data, colorScale }: HeatmapProps) {
-  // Debug: log data length and sample
-  console.log(`${title} - Total days:`, data.length)
-  console.log(`${title} - First day:`, data[0])
-  console.log(`${title} - Last day:`, data[data.length - 1])
-  console.log(`${title} - Sample with data:`, data.filter(d => (d.count ?? 0) > 0))
-
   // Transform data to react-heat-map format
-  // The library uses the 'count' field to determine color, so we'll map intensity to count ranges
   const heatmapValue = data.map((day) => ({
     date: day.date.replace(/-/g, "/"), // Convert YYYY-MM-DD to YYYY/MM/DD for Safari support
     count: day.intensity, // Use intensity (0-4) directly as count for color mapping
@@ -31,7 +24,6 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
   }
 
   // Create color mapping based on intensity (0-4)
-  // Using object format to map exact count values to colors
   const panelColors = {
     0: getColor(0),
     1: getColor(1),
@@ -47,10 +39,6 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
     data.length > 0
       ? new Date(data[data.length - 1].date.replace(/-/g, "/"))
       : new Date()
-
-  console.log(`${title} - Start date:`, startDate)
-  console.log(`${title} - End date:`, endDate)
-  console.log(`${title} - Heatmap value length:`, heatmapValue.length)
 
   return (
     <div className="space-y-3">
@@ -85,7 +73,7 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
             rectProps={{
               rx: 2,
             }}
-            legendRender={() => <div />}
+            legendRender={() => <g></g>}
             rectRender={(props, data) => {
               const intensity = (data as any).count || 0
               return (
