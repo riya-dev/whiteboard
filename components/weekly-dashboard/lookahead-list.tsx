@@ -88,7 +88,7 @@ export function LookaheadList({ items, onAdd, onUpdate, onDelete, placeholder = 
           )}
           <button
             onClick={() => onDelete(item.id)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded cursor-pointer"
             aria-label="Delete item"
           >
             <X className="w-3 h-3 text-destructive" />

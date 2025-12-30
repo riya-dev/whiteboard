@@ -35,6 +35,7 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
                     <Checkbox
                       checked={dayTracking?.am_checkin || false}
                       onCheckedChange={() => onToggle(dateStr, "am_checkin")}
+                      className="cursor-pointer"
                     />
                     <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "am_checkin")}>
                       AM Check-in
@@ -46,6 +47,7 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
                     <Checkbox
                       checked={dayTracking?.pm_checkin || false}
                       onCheckedChange={() => onToggle(dateStr, "pm_checkin")}
+                      className="cursor-pointer"
                     />
                     <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "pm_checkin")}>
                       PM Check-in
@@ -59,6 +61,7 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
                       onCheckedChange={() =>
                         onToggle(dateStr, "set_goals_tomorrow")
                       }
+                      className="cursor-pointer"
                     />
                     <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "set_goals_tomorrow")}>
                       Set Goals for Tomorrow

@@ -120,7 +120,7 @@ export function SidebarWeekly({
                 <Checkbox
                   checked={goal.is_completed}
                   onCheckedChange={() => onToggleWeeklyGoal(goal.id)}
-                  className="mt-0.5"
+                  className="mt-0.5 cursor-pointer"
                 />
                 {editingGoalId === goal.id ? (
                   <Input
@@ -154,7 +154,7 @@ export function SidebarWeekly({
                 )}
                 <button
                   onClick={() => onDeleteWeeklyGoal(goal.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded cursor-pointer"
                   aria-label="Delete goal"
                 >
                   <X className="w-3 h-3 text-destructive" />

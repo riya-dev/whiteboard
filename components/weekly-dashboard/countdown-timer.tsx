@@ -81,7 +81,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
       <div className="w-auto">
         <button
           onClick={() => setIsEditing(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-all text-sm text-muted-foreground hover:text-primary"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-all text-sm text-muted-foreground hover:text-primary cursor-pointer"
         >
           <CalendarIcon className="h-4 w-4" />
           <span>Add countdown</span>
@@ -202,7 +202,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
             {/* Edit button */}
             <button
               onClick={handleEdit}
-              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-primary/10 rounded"
+              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-primary/10 rounded cursor-pointer"
               aria-label="Edit countdown"
             >
               <Pencil className="w-3.5 h-3.5 text-muted-foreground" />

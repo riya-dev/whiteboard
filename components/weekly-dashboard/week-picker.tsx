@@ -25,7 +25,7 @@ export function WeekPicker({ weekStart, onWeekChange }: WeekPickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button type="button" className="week-picker-pill">
+        <button type="button" className="week-picker-pill cursor-pointer">
           <CalendarIcon className="h-4 w-4" />
           <span>{formatWeekDisplay(weekStart)}</span>
         </button>
