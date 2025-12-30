@@ -76,8 +76,8 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
   const [allDailyGoals, setAllDailyGoals] = useState<DailyGoalData[]>([])
   const [allDisciplineTracking, setAllDisciplineTracking] = useState<DisciplineTrackingData[]>([])
 
-  // Countdown events
-  const [countdownEvents, setCountdownEvents] = useState<CountdownEvent[]>([])
+  // Countdown event (single)
+  const [countdownEvent, setCountdownEvent] = useState<CountdownEvent | null>(null)
 
   // ===== DATA LOADING =====
 
@@ -174,13 +174,15 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
     setAllDisciplineTracking(allDisciplineData || [])
 
-    // Load countdown events
+    // Load countdown event (single)
     const { data: countdownData } = await supabase
       .from("countdown_events")
       .select("*")
       .order("target_date", { ascending: true })
+      .limit(1)
+      .single()
 
-    setCountdownEvents(countdownData || [])
+    setCountdownEvent(countdownData || null)
 
     setLoading(false)
   }
@@ -461,7 +463,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
   // ===== COUNTDOWN EVENT HANDLERS =====
 
-  async function handleAddCountdownEvent(eventName: string, targetDate: string) {
+  async function handleSaveCountdownEvent(eventName: string, targetDate: string) {
     const { data, error } = await supabase
       .from("countdown_events")
       .insert({
@@ -473,7 +475,23 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
       .single()
 
     if (!error && data) {
-      setCountdownEvents((prev) => [...prev, data].sort((a, b) => a.target_date.localeCompare(b.target_date)))
+      setCountdownEvent(data)
+    }
+  }
+
+  async function handleUpdateCountdownEvent(id: string, eventName: string, targetDate: string) {
+    const { data, error } = await supabase
+      .from("countdown_events")
+      .update({
+        event_name: eventName,
+        target_date: targetDate,
+      })
+      .eq("id", id)
+      .select()
+      .single()
+
+    if (!error && data) {
+      setCountdownEvent(data)
     }
   }
 
@@ -481,7 +499,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     const { error } = await supabase.from("countdown_events").delete().eq("id", id)
 
     if (!error) {
-      setCountdownEvents((prev) => prev.filter((event) => event.id !== id))
+      setCountdownEvent(null)
     }
   }
 
@@ -513,11 +531,14 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
             <h2 className="text-2xl font-semibold text-foreground">Whiteboard</h2>
 
             {/* Countdown Timer */}
-            <CountdownTimer
-              events={countdownEvents}
-              onAddEvent={handleAddCountdownEvent}
-              onDeleteEvent={handleDeleteCountdownEvent}
-            />
+            <div className="flex justify-end">
+              <CountdownTimer
+                event={countdownEvent}
+                onSaveEvent={handleSaveCountdownEvent}
+                onUpdateEvent={handleUpdateCountdownEvent}
+                onDeleteEvent={handleDeleteCountdownEvent}
+              />
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Sidebar (Desktop) */}

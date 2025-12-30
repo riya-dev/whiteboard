@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, X } from "lucide-react"
+import { CalendarIcon, Pencil, X } from "lucide-react"
 import { format } from "date-fns"
 
 interface CountdownEvent {
@@ -16,8 +16,9 @@ interface CountdownEvent {
 }
 
 interface CountdownTimerProps {
-  events: CountdownEvent[]
-  onAddEvent: (eventName: string, targetDate: string) => void
+  event: CountdownEvent | null
+  onSaveEvent: (eventName: string, targetDate: string) => void
+  onUpdateEvent: (id: string, eventName: string, targetDate: string) => void
   onDeleteEvent: (id: string) => void
 }
 
@@ -33,119 +34,154 @@ function calculateCountdown(targetDate: string): { weeks: number; days: number }
   return { weeks, days }
 }
 
-export function CountdownTimer({ events, onAddEvent, onDeleteEvent }: CountdownTimerProps) {
-  const [isAdding, setIsAdding] = useState(false)
+export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEvent }: CountdownTimerProps) {
+  const [isEditing, setIsEditing] = useState(false)
   const [eventName, setEventName] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date | undefined>()
 
-  const handleAdd = () => {
+  const handleEdit = () => {
+    if (event) {
+      setEventName(event.event_name)
+      setSelectedDate(new Date(event.target_date))
+      setIsEditing(true)
+    }
+  }
+
+  const handleSave = () => {
     if (eventName.trim() && selectedDate) {
       const targetDate = format(selectedDate, "yyyy-MM-dd")
-      onAddEvent(eventName.trim(), targetDate)
+      if (event) {
+        onUpdateEvent(event.id, eventName.trim(), targetDate)
+      } else {
+        onSaveEvent(eventName.trim(), targetDate)
+      }
       setEventName("")
       setSelectedDate(undefined)
-      setIsAdding(false)
+      setIsEditing(false)
     }
   }
 
   const handleCancel = () => {
     setEventName("")
     setSelectedDate(undefined)
-    setIsAdding(false)
+    setIsEditing(false)
   }
 
-  return (
-    <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-      <CardContent className="p-4">
-        {events.length === 0 && !isAdding ? (
-          <Button
-            variant="ghost"
-            onClick={() => setIsAdding(true)}
-            className="w-full text-sm text-muted-foreground hover:text-foreground"
-          >
-            + Add countdown
-          </Button>
-        ) : (
-          <div className="space-y-3">
-            {events.map((event) => {
-              const { weeks, days } = calculateCountdown(event.target_date)
-              return (
-                <div
-                  key={event.id}
-                  className="flex items-center justify-between gap-4 group"
-                >
-                  <div className="flex-1 text-sm font-medium">
-                    <span className="text-primary font-semibold">
-                      {weeks} {weeks === 1 ? "week" : "weeks"}{" "}
-                      {days} {days === 1 ? "day" : "days"}
-                    </span>
-                    <span className="text-muted-foreground"> until </span>
-                    <span className="text-foreground">{event.event_name}</span>
-                  </div>
-                  <button
-                    onClick={() => onDeleteEvent(event.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded"
-                    aria-label="Delete countdown"
-                  >
-                    <X className="w-4 h-4 text-destructive" />
-                  </button>
-                </div>
-              )
-            })}
+  const handleDelete = () => {
+    if (event) {
+      onDeleteEvent(event.id)
+      setIsEditing(false)
+    }
+  }
 
-            {isAdding ? (
-              <div className="flex items-center gap-2 pt-2 border-t">
-                <Input
-                  type="text"
-                  value={eventName}
-                  onChange={(e) => setEventName(e.target.value)}
-                  placeholder="Event name..."
-                  className="flex-1 h-8 text-sm"
-                  autoFocus
-                />
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-8 w-[140px] text-xs justify-start"
-                    >
-                      <CalendarIcon className="mr-2 h-3 w-3" />
-                      {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Pick date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <Button onClick={handleAdd} size="sm" className="h-8 text-xs">
-                  Add
-                </Button>
+  if (!event && !isEditing) {
+    return (
+      <div className="inline-block">
+        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+          <CardContent className="p-3">
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditing(true)}
+              className="h-8 text-sm text-muted-foreground hover:text-foreground"
+            >
+              + Add countdown
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (isEditing) {
+    return (
+      <div className="inline-block">
+        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={eventName}
+                onChange={(e) => setEventName(e.target.value)}
+                placeholder="Event name..."
+                className="h-8 text-sm w-40"
+                autoFocus
+              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-8 w-[130px] text-xs justify-start"
+                  >
+                    <CalendarIcon className="mr-2 h-3 w-3" />
+                    {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Pick date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <Button onClick={handleSave} size="sm" className="h-8 text-xs">
+                Save
+              </Button>
+              <Button
+                onClick={handleCancel}
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs"
+              >
+                Cancel
+              </Button>
+              {event && (
                 <Button
-                  onClick={handleCancel}
+                  onClick={handleDelete}
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-xs"
+                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
                 >
-                  Cancel
+                  <X className="h-4 w-4" />
                 </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (event) {
+    const { weeks, days } = calculateCountdown(event.target_date)
+    return (
+      <div className="inline-block group">
+        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+          <CardContent className="p-3">
+            <div className="flex items-start gap-3">
+              <div>
+                <div className="text-lg font-semibold text-primary">
+                  {weeks} {weeks === 1 ? "week" : "weeks"}{" "}
+                  {days} {days === 1 ? "day" : "days"}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  until <span className="text-foreground">{event.event_name}</span>
+                </div>
               </div>
-            ) : (
-              <Button
-                variant="ghost"
-                onClick={() => setIsAdding(true)}
-                className="w-full h-8 text-xs text-muted-foreground hover:text-foreground"
+              <button
+                onClick={handleEdit}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent rounded"
+                aria-label="Edit countdown"
               >
-                + Add another
-              </Button>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+                <Pencil className="w-3 h-3 text-muted-foreground" />
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return null
 }
