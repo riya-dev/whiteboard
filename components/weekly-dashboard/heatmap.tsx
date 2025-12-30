@@ -2,25 +2,60 @@
 
 import HeatMap from "@uiw/react-heat-map"
 import type { HeatmapDay } from "@/lib/date-utils"
+import { formatDateWithOrdinal } from "@/lib/date-utils"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 
 interface HeatmapProps {
   title: string
   data: HeatmapDay[]
   colorScale: "goals" | "discipline"
+  tooltipType: "goals" | "discipline"
+  statisticsElement?: React.ReactNode
 }
 
-export function Heatmap({ title, data, colorScale }: HeatmapProps) {
-  // Transform data to react-heat-map format
+export function Heatmap({ title, data, colorScale, tooltipType, statisticsElement }: HeatmapProps) {
+  // Transform data to react-heat-map format with metadata
   const heatmapValue = data.map((day) => ({
     date: day.date.replace(/-/g, "/"), // Convert YYYY-MM-DD to YYYY/MM/DD for Safari support
     count: day.intensity, // Use intensity (0-4) directly as count for color mapping
     content: `${day.count || 0}/${day.total || 0}`, // Store actual count/total for tooltip
+    metadata: day.metadata, // Pass through metadata for discipline tooltips
   }))
 
   // Get color based on intensity level (0-4)
   const getColor = (intensity: number): string => {
     const prefix = colorScale === "goals" ? "heatmap-goals" : "heatmap-discipline"
     return `var(--${prefix}-${intensity})`
+  }
+
+  // Generate tooltip content for discipline heatmap
+  const generateDisciplineTooltip = (cellData: any, formattedDate: string): string => {
+    const metadata = cellData.metadata
+    if (!metadata) return `No habits tracked on ${formattedDate}`
+
+    const completed = []
+    if (metadata.am_checkin) completed.push("AM Check-in")
+    if (metadata.pm_checkin) completed.push("PM Check-in")
+    if (metadata.set_goals_tomorrow) completed.push("next day goal-setting")
+
+    if (completed.length === 0) return `No habits completed on ${formattedDate}`
+
+    return `${completed.join(", ")} completed on ${formattedDate}`
+  }
+
+  // Generate tooltip content based on type
+  const generateTooltipContent = (cellData: any): string => {
+    const dateStr = cellData.date // YYYY/MM/DD format from library
+    const formattedDate = formatDateWithOrdinal(dateStr)
+
+    if (tooltipType === "goals") {
+      const content = cellData.content || "0/0"
+      const [, total] = content.split("/")
+      if (total === "0") return `No goals set on ${formattedDate}`
+      return `${content} goals completed on ${formattedDate}`
+    } else {
+      return generateDisciplineTooltip(cellData, formattedDate)
+    }
   }
 
   // Create color mapping based on intensity (0-4)
@@ -59,31 +94,46 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
         </div>
       </div>
 
+      {statisticsElement && <div>{statisticsElement}</div>}
+
       <div className="overflow-x-auto">
         <div style={{ minWidth: 'fit-content' }}>
-          <HeatMap
-            value={heatmapValue}
-            startDate={startDate}
-            endDate={endDate}
-            panelColors={panelColors}
-            weekLabels={["", "M", "", "W", "", "F", ""]}
-            rectSize={14}
-            space={4}
-            width={1100}
-            rectProps={{
-              rx: 2,
-            }}
-            legendRender={() => null as any}
-            rectRender={(props, data) => {
-              const intensity = (data as any).count || 0
-              return (
-                <rect
-                  {...props}
-                  fill={getColor(intensity)}
-                />
-              )
-            }}
-          />
+          <TooltipProvider delayDuration={100}>
+            <HeatMap
+              value={heatmapValue}
+              startDate={startDate}
+              endDate={endDate}
+              panelColors={panelColors}
+              weekLabels={["", "M", "", "W", "", "F", ""]}
+              rectSize={14}
+              space={4}
+              width={1100}
+              rectProps={{
+                rx: 2,
+              }}
+              legendRender={() => null as any}
+              rectRender={(props, data) => {
+                const intensity = (data as any).count || 0
+                const cellData = data as any
+                const tooltipContent = generateTooltipContent(cellData)
+
+                return (
+                  <Tooltip key={props.key}>
+                    <TooltipTrigger asChild>
+                      <rect
+                        {...props}
+                        fill={getColor(intensity)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-xs">{tooltipContent}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              }}
+            />
+          </TooltipProvider>
         </div>
       </div>
     </div>

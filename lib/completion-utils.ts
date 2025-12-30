@@ -200,6 +200,7 @@ export function buildDisciplineHeatmapData(
       intensity: calculateDisciplineIntensity(date, tracking),
       count: completedCount,
       total: 3, // Always 3 discipline items
+      metadata: dayTracking, // Include raw tracking data for tooltips
     }
   })
 }
@@ -307,5 +308,87 @@ export function getWeeklySummary(
     disciplineCompleted,
     disciplineTotal: 21, // 7 days × 3 items
     disciplinePercentage: calculateWeeklyDisciplinePercentage(weekDates, tracking),
+  }
+}
+
+// =============================================
+// OVERALL STATISTICS (365 DAYS)
+// =============================================
+
+/**
+ * Calculate overall goals statistics from heatmap data
+ * Used for statistics card display
+ * @param heatmapData - Array of HeatmapDay objects
+ * @returns Statistics object with total, completed, and percentage
+ */
+export function calculateGoalsStatistics(heatmapData: HeatmapDay[]): {
+  totalGoals: number
+  completedGoals: number
+  percentage: number
+} {
+  let totalGoals = 0
+  let completedGoals = 0
+
+  heatmapData.forEach((day) => {
+    if (day.total !== undefined) {
+      totalGoals += day.total
+    }
+    if (day.count !== undefined) {
+      completedGoals += day.count
+    }
+  })
+
+  const percentage = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0
+
+  return {
+    totalGoals,
+    completedGoals,
+    percentage,
+  }
+}
+
+/**
+ * Calculate overall discipline statistics from tracking data
+ * Used for statistics card display
+ * @param heatmapData - Array of HeatmapDay objects (for structure)
+ * @param tracking - All discipline tracking records
+ * @returns Statistics object with breakdown by habit type
+ */
+export function calculateDisciplineStatistics(
+  heatmapData: HeatmapDay[],
+  tracking: DisciplineTrackingData[]
+): {
+  amCheckin: { completed: number; total: number; percentage: number }
+  pmCheckin: { completed: number; total: number; percentage: number }
+  setGoalsTomorrow: { completed: number; total: number; percentage: number }
+} {
+  let amCompleted = 0
+  let pmCompleted = 0
+  let setGoalsCompleted = 0
+
+  tracking.forEach((day) => {
+    if (day.am_checkin) amCompleted++
+    if (day.pm_checkin) pmCompleted++
+    if (day.set_goals_tomorrow) setGoalsCompleted++
+  })
+
+  const total = heatmapData.length // Total days (365)
+
+  return {
+    amCheckin: {
+      completed: amCompleted,
+      total,
+      percentage: total > 0 ? Math.round((amCompleted / total) * 100) : 0,
+    },
+    pmCheckin: {
+      completed: pmCompleted,
+      total,
+      percentage: total > 0 ? Math.round((pmCompleted / total) * 100) : 0,
+    },
+    setGoalsTomorrow: {
+      completed: setGoalsCompleted,
+      total,
+      percentage: total > 0 ? Math.round((setGoalsCompleted / total) * 100) : 0,
+    },
   }
 }

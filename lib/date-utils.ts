@@ -8,6 +8,7 @@ export interface HeatmapDay {
   intensity: number // 0-4 (GitHub style: 0=none, 1-4=increasing intensity)
   count?: number // Optional: raw count of completed items
   total?: number // Optional: total items for percentage
+  metadata?: any // Optional: raw data for detailed tooltips (e.g., discipline tracking)
 }
 
 /**
@@ -127,6 +128,25 @@ export function getLast365Days(): string[] {
     date.setDate(today.getDate() - i)
     dates.push(formatDate(date))
   }
+  return dates
+}
+
+/**
+ * Get dates from December 29th, 2025 to today in YYYY-MM-DD format
+ * Used for habits statistics
+ * @returns Array of date strings from Dec 29, 2025 to today
+ */
+export function getDatesFromStart(): string[] {
+  const dates: string[] = []
+  const startDate = new Date("2025-12-29T00:00:00")
+  const today = new Date()
+
+  const currentDate = new Date(startDate)
+  while (currentDate <= today) {
+    dates.push(formatDate(currentDate))
+    currentDate.setDate(currentDate.getDate() + 1)
+  }
+
   return dates
 }
 
@@ -279,4 +299,41 @@ export function formatBiweeklyEndDate(endMonday: Date): string {
 export function parseDate(dateStr: string): Date {
   const date = new Date(dateStr + "T00:00:00")
   return date
+}
+
+/**
+ * Get ordinal suffix for a day number (st, nd, rd, th)
+ * @param day - Day number (1-31)
+ * @returns Ordinal suffix
+ */
+function getOrdinalSuffix(day: number): string {
+  if (day > 3 && day < 21) return "th"
+  switch (day % 10) {
+    case 1:
+      return "st"
+    case 2:
+      return "nd"
+    case 3:
+      return "rd"
+    default:
+      return "th"
+  }
+}
+
+/**
+ * Format a date string with ordinal day (e.g., "December 30th")
+ * Supports both YYYY-MM-DD and YYYY/MM/DD formats
+ * @param dateStr - Date string in YYYY-MM-DD or YYYY/MM/DD format
+ * @returns Formatted string like "December 30th"
+ */
+export function formatDateWithOrdinal(dateStr: string): string {
+  // Convert slashes to hyphens for consistent parsing
+  const normalizedStr = dateStr.replace(/\//g, "-")
+  const date = parseDate(normalizedStr)
+
+  const month = date.toLocaleDateString("en-US", { month: "long" })
+  const day = date.getDate()
+  const ordinal = getOrdinalSuffix(day)
+
+  return `${month} ${day}${ordinal}`
 }

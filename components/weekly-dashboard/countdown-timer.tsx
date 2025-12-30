@@ -76,7 +76,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (!event && !isEditing) {
     return (
-      <div className="inline-block h-14">
+      <div className="h-14 w-auto">
         <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
           <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
             <Button
@@ -95,7 +95,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (isEditing) {
     return (
-      <div className="inline-block h-14">
+      <div className="h-14 w-auto">
         <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
           <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
             <div className="flex items-center gap-2">
@@ -158,10 +158,13 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (event) {
     const { weeks, days } = calculateCountdown(event.target_date)
+    const targetDate = new Date(event.target_date)
+    const formattedDate = format(targetDate, "EEE, MMM d, yyyy").toUpperCase()
+
     return (
-      <div className="inline-block group h-14">
+      <div className="group h-14 w-auto">
         <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
-          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
+          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center whitespace-nowrap">
             <div className="flex items-start gap-2">
               <div>
                 <div className="text-lg font-semibold text-primary leading-tight">
@@ -169,7 +172,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
                   {days} {days === 1 ? "day" : "days"}
                 </div>
                 <div className="text-sm text-muted-foreground leading-tight">
-                  until <span className="text-foreground">{event.event_name}</span>
+                  until <span className="text-foreground">{event.event_name}, {formattedDate}</span>
                 </div>
               </div>
               <button

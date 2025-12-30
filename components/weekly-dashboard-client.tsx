@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import { getTuesdayWeekStart, getTuesdayWeekDates, formatDate, getLast365Days, isInBiweeklyPeriod } from "@/lib/date-utils"
+import { getTuesdayWeekStart, getTuesdayWeekDates, formatDate, getLast365Days, getDatesFromStart, isInBiweeklyPeriod } from "@/lib/date-utils"
 import { format } from "date-fns"
 import type { DailyGoalData, DisciplineTrackingData } from "@/lib/completion-utils"
+import { buildDisciplineHeatmapData } from "@/lib/completion-utils"
 
 // Components
 import { DashboardHeader } from "./weekly-dashboard/header"
@@ -13,6 +14,7 @@ import { SidebarWeekly } from "./weekly-dashboard/sidebar-weekly"
 import { MobileSidebar } from "./weekly-dashboard/mobile-sidebar"
 import { DailyGrid } from "./weekly-dashboard/daily-grid"
 import { DisciplineCard } from "./weekly-dashboard/discipline-card"
+import { DisciplineStatisticsCard } from "./weekly-dashboard/discipline-statistics-card"
 import { GoalsHeatmap } from "./weekly-dashboard/heatmap-goals"
 import { DisciplineHeatmap } from "./weekly-dashboard/heatmap-discipline"
 import { CountdownTimer } from "./weekly-dashboard/countdown-timer"
@@ -639,11 +641,19 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
             <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
               Habits
             </h2>
-            <DisciplineCard
-              weekDates={weekDates}
-              tracking={disciplineTracking}
-              onToggle={handleToggleDiscipline}
-            />
+
+            {/* Two-column layout for discipline card and statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <DisciplineCard
+                weekDates={weekDates}
+                tracking={disciplineTracking}
+                onToggle={handleToggleDiscipline}
+              />
+              <DisciplineStatisticsCard
+                heatmapData={buildDisciplineHeatmapData(getDatesFromStart(), allDisciplineTracking)}
+                tracking={allDisciplineTracking}
+              />
+            </div>
 
             {/* Discipline Heatmap */}
             <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-muted/5 border-border/50">
