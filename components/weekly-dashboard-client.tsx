@@ -19,6 +19,7 @@ import { CountdownTimer } from "./weekly-dashboard/countdown-timer"
 import { WeekPicker } from "./weekly-dashboard/week-picker"
 import { BowDecorations } from "./bow-decorations"
 import { Card, CardContent } from "./ui/card"
+import { triggerConfetti } from "@/lib/confetti";
 import type { LookaheadItem } from "./weekly-dashboard/lookahead-list"
 
 // ===== TYPE DEFINITIONS =====
@@ -198,12 +199,16 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
       .eq("id", goal.id)
 
     if (!error) {
-      setDailyGoals((prev) => ({
-        ...prev,
-        [goal.goal_date]: prev[goal.goal_date].map((g) =>
+      setDailyGoals((prev) => {
+        const updatedForDay = prev[goal.goal_date].map((g) =>
           g.id === goal.id ? { ...g, is_completed: !g.is_completed } : g
-        ),
-      }))
+        );
+        const next = { ...prev, [goal.goal_date]: updatedForDay };
+        const hasGoals = updatedForDay.length > 0;
+        const allDone = hasGoals && updatedForDay.every((g) => g.is_completed);
+        if (allDone) triggerConfetti("rgb(244 63 94)");
+        return next;
+      });
       // Refresh heatmap data
       loadData()
     }
@@ -438,9 +443,16 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         .eq("track_date", dateStr)
         .eq("user_id", user.id)
 
-      setDisciplineTracking((prev) =>
-        prev.map((t) => (t.track_date === dateStr ? { ...t, [field]: newValue } : t))
-      )
+      setDisciplineTracking((prev) => {
+        const next = prev.map((t) =>
+          t.track_date === dateStr ? { ...t, [field]: newValue } : t
+        );
+        const day = next.find((t) => t.track_date === dateStr);
+        if (day && day.am_checkin && day.pm_checkin && day.set_goals_tomorrow) {
+          triggerConfetti("rgb(244 63 94)");
+        }
+        return next;
+      });
     } else {
       const { data, error } = await supabase
         .from("discipline_tracking")
@@ -455,7 +467,19 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         .single()
 
       if (!error && data) {
-        setDisciplineTracking((prev) => [...prev, data])
+        setDisciplineTracking((prev) => {
+          const next = [...prev, data];
+          const day = next.find((t) => t.track_date === dateStr);
+          if (
+            day &&
+            day.am_checkin &&
+            day.pm_checkin &&
+            day.set_goals_tomorrow
+          ) {
+            triggerConfetti("rgb(244 63 94)");
+          }
+          return next;
+        });
       }
     }
 
@@ -524,18 +548,21 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <DashboardHeader weekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} />
+        <DashboardHeader
+          weekStart={currentWeekStart}
+          onWeekChange={setCurrentWeekStart}
+        />
 
         {/* Main Layout */}
         <div className="space-y-12">
           {/* ========== WHITEBOARD SECTION ========== */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
+            {/* <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
               Whiteboard
-            </h2>
+            </h2> */}
 
             {/* Top Info Bar */}
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               {/* Center: Week Date (full available width) */}
               <div className="flex-1">
                 <Card className="w-full h-14 flex items-center bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
@@ -619,7 +646,11 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
             <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
               Habits
             </h2>
-            <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
+            <DisciplineCard
+              weekDates={weekDates}
+              tracking={disciplineTracking}
+              onToggle={handleToggleDiscipline}
+            />
 
             {/* Discipline Heatmap */}
             <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-muted/5 border-border/50">
@@ -629,5 +660,5 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

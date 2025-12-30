@@ -106,16 +106,8 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
   }, [dateStr])
 
   return (
-    <div className={today ? "relative" : undefined}>
-      {today && (
-        <div className="pointer-events-none absolute -inset-1 rounded-xl bg-primary/25 blur-lg" aria-hidden />
-      )}
       <Card
-        className={`relative p-5 transition-all duration-300 ${
-          today
-            ? "border-primary/40 bg-gradient-to-br from-primary/8 via-accent/8 to-primary/5 shadow-lg shadow-primary/20 ring-2 ring-primary/20"
-            : "border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border"
-        }`}
+        className={`relative p-5 transition-all duration-300 border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border`}
       >
         {/* Top-right quick flags */}
         <div className="absolute top-2 right-2 flex items-center gap-1.5">
@@ -159,7 +151,7 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
         <div className={`text-3xl font-light tracking-tight ${today ? "text-primary font-medium" : "text-foreground"}`}>
           {today ? (
             <span className="relative inline-flex items-center justify-center">
-              <span className="absolute inset-0 rounded-full bg-primary/30 blur-md opacity-70" aria-hidden />
+              <span className="absolute inset-0 rounded-full bg-primary/10 blur-sm opacity-40" aria-hidden />
               <span className="relative z-10">{dayNum}</span>
             </span>
           ) : (
@@ -216,6 +208,5 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
         />
       </div>
       </Card>
-    </div>
   )
 }
