@@ -14,6 +14,8 @@ import { DailyGrid } from "./weekly-dashboard/daily-grid"
 import { DisciplineCard } from "./weekly-dashboard/discipline-card"
 import { GoalsHeatmap } from "./weekly-dashboard/heatmap-goals"
 import { DisciplineHeatmap } from "./weekly-dashboard/heatmap-discipline"
+import { CountdownTimer } from "./weekly-dashboard/countdown-timer"
+import { BowDecorations } from "./bow-decorations"
 import { Card } from "./ui/card"
 import type { LookaheadItem } from "./weekly-dashboard/lookahead-list"
 
@@ -47,6 +49,14 @@ interface DisciplineTracking {
   set_goals_tomorrow: boolean
 }
 
+interface CountdownEvent {
+  id: string
+  user_id: string
+  event_name: string
+  target_date: string
+  created_at: string
+}
+
 // ===== MAIN COMPONENT =====
 
 export default function WeeklyDashboardClient({ user }: { user: User }) {
@@ -65,6 +75,9 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
   // Heatmap data (365 days)
   const [allDailyGoals, setAllDailyGoals] = useState<DailyGoalData[]>([])
   const [allDisciplineTracking, setAllDisciplineTracking] = useState<DisciplineTrackingData[]>([])
+
+  // Countdown events
+  const [countdownEvents, setCountdownEvents] = useState<CountdownEvent[]>([])
 
   // ===== DATA LOADING =====
 
@@ -160,6 +173,14 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
       .in("track_date", last365Days)
 
     setAllDisciplineTracking(allDisciplineData || [])
+
+    // Load countdown events
+    const { data: countdownData } = await supabase
+      .from("countdown_events")
+      .select("*")
+      .order("target_date", { ascending: true })
+
+    setCountdownEvents(countdownData || [])
 
     setLoading(false)
   }
@@ -438,6 +459,32 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     loadData()
   }
 
+  // ===== COUNTDOWN EVENT HANDLERS =====
+
+  async function handleAddCountdownEvent(eventName: string, targetDate: string) {
+    const { data, error } = await supabase
+      .from("countdown_events")
+      .insert({
+        user_id: user.id,
+        event_name: eventName,
+        target_date: targetDate,
+      })
+      .select()
+      .single()
+
+    if (!error && data) {
+      setCountdownEvents((prev) => [...prev, data].sort((a, b) => a.target_date.localeCompare(b.target_date)))
+    }
+  }
+
+  async function handleDeleteCountdownEvent(id: string) {
+    const { error } = await supabase.from("countdown_events").delete().eq("id", id)
+
+    if (!error) {
+      setCountdownEvents((prev) => prev.filter((event) => event.id !== id))
+    }
+  }
+
   // ===== RENDER =====
 
   if (loading) {
@@ -451,8 +498,11 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
   const weekDates = getTuesdayWeekDates(currentWeekStart)
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-background">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen p-4 md:p-8 bg-background relative">
+      {/* Bow decorations */}
+      <BowDecorations />
+
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <DashboardHeader weekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} />
 
@@ -461,6 +511,13 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
           {/* ========== WHITEBOARD SECTION ========== */}
           <section className="space-y-6">
             <h2 className="text-2xl font-semibold text-foreground">Whiteboard</h2>
+
+            {/* Countdown Timer */}
+            <CountdownTimer
+              events={countdownEvents}
+              onAddEvent={handleAddCountdownEvent}
+              onDeleteEvent={handleDeleteCountdownEvent}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Sidebar (Desktop) */}
@@ -500,8 +557,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
               </div>
 
               {/* Main Content - Daily Grid */}
-              <div className="lg:col-span-9 space-y-4">
-                <h3 className="text-lg font-semibold text-foreground">Daily Goals</h3>
+              <div className="lg:col-span-9">
                 <DailyGrid
                   weekDates={weekDates}
                   dailyGoals={dailyGoals}
