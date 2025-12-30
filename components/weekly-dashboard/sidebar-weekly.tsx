@@ -82,28 +82,30 @@ export function SidebarWeekly({
   return (
     <Card className="weekly-sidebar">
       <CardContent className="space-y-6 pt-6">
-        {/* Weekly Goals Section */}
+        {/* Top right toggle */}
+        <div className="flex justify-end -mt-2">
+          <ToggleGroup
+            type="single"
+            value={cadence}
+            onValueChange={(val) =>
+              val && onCadenceChange(val as "weekly" | "biweekly")
+            }
+            className="gap-1"
+          >
+            <ToggleGroupItem value="weekly" className="h-7 px-3 text-xs">
+              Weekly
+            </ToggleGroupItem>
+            <ToggleGroupItem value="biweekly" className="h-7 px-3 text-xs">
+              Biweekly
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+
+        {/* Goals Section */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-foreground">
-              Weekly Goals
-            </h3>
-            <ToggleGroup
-              type="single"
-              value={cadence}
-              onValueChange={(val) =>
-                val && onCadenceChange(val as "weekly" | "biweekly")
-              }
-              className="gap-1"
-            >
-              <ToggleGroupItem value="weekly" className="h-7 px-3 text-xs">
-                Weekly
-              </ToggleGroupItem>
-              <ToggleGroupItem value="biweekly" className="h-7 px-3 text-xs">
-                Biweekly
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+          <h3 className="text-base font-semibold text-foreground mb-3">
+            Goals
+          </h3>
 
           {/* Biweekly end date display */}
           {biweeklyEndDate && (
