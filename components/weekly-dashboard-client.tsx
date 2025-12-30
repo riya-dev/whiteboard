@@ -632,7 +632,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
             {/* Goals Heatmap */}
             <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-muted/5 border-border/50">
-              <GoalsHeatmap goals={allDailyGoals} />
+              <GoalsHeatmap goals={allDailyGoals} weekDates={weekDates.map(formatDate)} />
             </Card>
           </section>
 

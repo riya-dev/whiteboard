@@ -3,7 +3,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { getShortDayName } from "@/lib/date-utils"
-import { calculateWeeklyDisciplinePercentage } from "@/lib/completion-utils"
 import type { DisciplineTrackingData } from "@/lib/completion-utils"
 
 interface DisciplineCardProps {
@@ -13,9 +12,6 @@ interface DisciplineCardProps {
 }
 
 export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCardProps) {
-  const weekDateStrs = weekDates.map((d) => d.toISOString().split("T")[0])
-  const disciplinePercentage = calculateWeeklyDisciplinePercentage(weekDateStrs, tracking)
-
   const getDayTracking = (dateStr: string): DisciplineTrackingData | undefined => {
     return tracking.find((t) => t.track_date === dateStr)
   }
@@ -23,12 +19,6 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
   return (
     <Card className="bg-gradient-to-br from-card to-muted/5 border-border/50">
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-5">
-          <div className="text-sm font-medium">
-            <span className="text-lg font-semibold text-primary">{disciplinePercentage}%</span>
-            <span className="text-muted-foreground ml-2">this week</span>
-          </div>
-        </div>
         <div className="space-y-2">
           {weekDates.map((date) => {
             const dateStr = date.toISOString().split("T")[0]

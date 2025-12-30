@@ -81,10 +81,10 @@ export function SidebarWeekly({
 
   return (
     <Card className="weekly-sidebar bg-gradient-to-br from-card to-muted/5 border-border/50">
-      <CardContent className="space-y-6 pt-6">
+      <CardContent className="space-y-8 pt-8 px-6">
         {/* Goals Section */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold text-foreground">Goals</h3>
             <ToggleGroup
               type="single"
@@ -105,17 +105,17 @@ export function SidebarWeekly({
 
           {/* Biweekly end date display */}
           {biweeklyEndDate && (
-            <p className="text-xs text-muted-foreground mb-2">
+            <p className="text-xs text-muted-foreground mb-3">
               Goals end {biweeklyEndDate}
             </p>
           )}
 
           {/* Goals list */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {weeklyGoals.map((goal) => (
               <div
                 key={goal.id}
-                className="group flex items-start gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors"
+                className="group flex items-start gap-2.5 p-2.5 rounded-md hover:bg-accent/50 transition-colors"
               >
                 <Checkbox
                   checked={goal.is_completed}
@@ -163,7 +163,7 @@ export function SidebarWeekly({
             ))}
 
             {/* Inline add input */}
-            <div className="flex items-start gap-2 p-2">
+            <div className="flex items-start gap-2.5 p-2.5">
               <Checkbox disabled className="mt-0.5 opacity-30" />
               <Input
                 type="text"
@@ -184,14 +184,14 @@ export function SidebarWeekly({
 
         {/* Look Ahead Section */}
         <div>
-          <h3 className="text-base font-semibold text-foreground mb-3">
+          <h3 className="text-base font-semibold text-foreground mb-4">
             Look Ahead
           </h3>
 
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* This week */}
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">
+              <label className="text-xs text-muted-foreground mb-2 block">
                 This week:
               </label>
               <LookaheadList
@@ -205,7 +205,7 @@ export function SidebarWeekly({
 
             {/* Next week */}
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">
+              <label className="text-xs text-muted-foreground mb-2 block">
                 Next week:
               </label>
               <LookaheadList
