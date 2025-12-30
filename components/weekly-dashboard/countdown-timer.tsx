@@ -78,11 +78,11 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
     return (
       <div className="inline-block">
         <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-3">
+          <CardContent className="p-2">
             <Button
               variant="ghost"
               onClick={() => setIsEditing(true)}
-              className="h-8 text-sm text-muted-foreground hover:text-foreground"
+              className="h-7 text-xs text-muted-foreground hover:text-foreground"
             >
               + Add countdown
             </Button>
@@ -96,24 +96,24 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
     return (
       <div className="inline-block">
         <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-3">
+          <CardContent className="p-2">
             <div className="flex items-center gap-2">
               <Input
                 type="text"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="Event name..."
-                className="h-8 text-sm w-40"
+                className="h-7 text-xs w-32"
                 autoFocus
               />
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="h-8 w-[130px] text-xs justify-start"
+                    className="h-7 w-[110px] text-xs justify-start"
                   >
-                    <CalendarIcon className="mr-2 h-3 w-3" />
-                    {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Pick date"}
+                    <CalendarIcon className="mr-1 h-3 w-3" />
+                    {selectedDate ? format(selectedDate, "MMM d") : "Date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -121,18 +121,17 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
                     mode="single"
                     selected={selectedDate}
                     onSelect={setSelectedDate}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>
-              <Button onClick={handleSave} size="sm" className="h-8 text-xs">
+              <Button onClick={handleSave} size="sm" className="h-7 text-xs px-2">
                 Save
               </Button>
               <Button
                 onClick={handleCancel}
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs"
+                className="h-7 text-xs px-2"
               >
                 Cancel
               </Button>
@@ -141,9 +140,9 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
                   onClick={handleDelete}
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               )}
             </div>
@@ -158,20 +157,20 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
     return (
       <div className="inline-block group">
         <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-3">
-            <div className="flex items-start gap-3">
+          <CardContent className="p-2">
+            <div className="flex items-start gap-2">
               <div>
-                <div className="text-lg font-semibold text-primary">
+                <div className="text-lg font-semibold text-primary leading-tight">
                   {weeks} {weeks === 1 ? "week" : "weeks"}{" "}
                   {days} {days === 1 ? "day" : "days"}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground leading-tight">
                   until <span className="text-foreground">{event.event_name}</span>
                 </div>
               </div>
               <button
                 onClick={handleEdit}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-accent rounded"
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-accent rounded"
                 aria-label="Edit countdown"
               >
                 <Pencil className="w-3 h-3 text-muted-foreground" />
