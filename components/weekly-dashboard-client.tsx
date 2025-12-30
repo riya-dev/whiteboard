@@ -18,7 +18,7 @@ import { DisciplineHeatmap } from "./weekly-dashboard/heatmap-discipline"
 import { CountdownTimer } from "./weekly-dashboard/countdown-timer"
 import { WeekPicker } from "./weekly-dashboard/week-picker"
 import { BowDecorations } from "./bow-decorations"
-import { Card } from "./ui/card"
+import { Card, CardContent } from "./ui/card"
 import type { LookaheadItem } from "./weekly-dashboard/lookahead-list"
 
 // ===== TYPE DEFINITIONS =====
@@ -527,28 +527,38 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         <DashboardHeader weekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} />
 
         {/* Main Layout */}
-        <div className="space-y-10">
+        <div className="space-y-12">
           {/* ========== WHITEBOARD SECTION ========== */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground">Whiteboard</h2>
+            <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
+              Whiteboard
+            </h2>
 
             {/* Top Info Bar */}
             <div className="flex items-center justify-between gap-4">
-              {/* Left: Empty Square Box */}
-              <div className="w-10 h-10 rounded border-2 border-dashed border-border bg-muted/20"></div>
+              {/* Left: Decorative Bow */}
+              <div className="flex items-center justify-center w-14 h-14 border border-border rounded-sm" aria-hidden />
 
-              {/* Center: Week Date */}
-              <div className="flex-1 flex justify-center">
-                <span className="text-foreground">Week of {format(currentWeekStart, "MMMM d, yyyy")}</span>
+              {/* Center: Week Date (full available width) */}
+              <div className="flex-1">
+                <Card className="w-full h-14 flex items-center bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+                  <CardContent className="w-full h-full px-4 py-0 flex items-center">
+                    <span className="text-xl md:text-2xl font-medium text-foreground w-full inline-block text-left">
+                      Week of {format(currentWeekStart, "MMMM d, yyyy")}
+                    </span>
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Right: Countdown Timer */}
-              <CountdownTimer
-                event={countdownEvent}
-                onSaveEvent={handleSaveCountdownEvent}
-                onUpdateEvent={handleUpdateCountdownEvent}
-                onDeleteEvent={handleDeleteCountdownEvent}
-              />
+              <div className="h-14 flex items-stretch mx-1 md:mx-2">
+                <CountdownTimer
+                  event={countdownEvent}
+                  onSaveEvent={handleSaveCountdownEvent}
+                  onUpdateEvent={handleUpdateCountdownEvent}
+                  onDeleteEvent={handleDeleteCountdownEvent}
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -602,18 +612,20 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
             </div>
 
             {/* Goals Heatmap */}
-            <Card className="p-4 md:p-6">
+            <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-muted/5 border-border/50">
               <GoalsHeatmap goals={allDailyGoals} />
             </Card>
           </section>
 
           {/* ========== HABITS SECTION ========== */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground">Habits</h2>
+            <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
+              Habits
+            </h2>
             <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
 
             {/* Discipline Heatmap */}
-            <Card className="p-4 md:p-6">
+            <Card className="p-6 md:p-8 bg-gradient-to-br from-card to-muted/5 border-border/50">
               <DisciplineHeatmap tracking={allDisciplineTracking} />
             </Card>
           </section>

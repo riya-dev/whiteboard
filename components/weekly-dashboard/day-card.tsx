@@ -71,25 +71,36 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
 
   return (
     <Card
-      className={`p-4 transition-all ${
-        today ? "border-primary bg-accent/20" : "border-border bg-card"
+      className={`p-5 transition-all duration-300 ${
+        today
+          ? "border-primary/40 bg-gradient-to-br from-primary/8 via-accent/8 to-primary/5 shadow-lg shadow-primary/20 ring-2 ring-primary/20"
+          : "border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border"
       }`}
     >
       {/* Day Header */}
-      <div className="mb-4 text-center">
-        <div className="flex items-center justify-center gap-1 mb-1">
-          <Calendar className="h-3 w-3 text-muted-foreground" />
-          <div className="text-xs text-muted-foreground uppercase tracking-wide">{dayName}</div>
+      <div className="mb-5 text-center">
+        <div className="flex items-center justify-center gap-1.5 mb-2">
+          <Calendar className={`h-3.5 w-3.5 ${today ? "text-primary" : "text-muted-foreground"}`} />
+          <div className={`text-xs uppercase tracking-wider font-medium ${today ? "text-primary" : "text-muted-foreground"}`}>
+            {dayName}
+          </div>
         </div>
-        <div className={`text-2xl font-light ${today ? "text-primary" : "text-foreground"}`}>
-          {dayNum}
+        <div className={`text-3xl font-light tracking-tight ${today ? "text-primary font-medium" : "text-foreground"}`}>
+          {today ? (
+            <span className="relative inline-flex items-center justify-center">
+              <span className="absolute inset-0 rounded-full bg-primary/30 blur-md opacity-70" aria-hidden />
+              <span className="relative z-10">{dayNum}</span>
+            </span>
+          ) : (
+            dayNum
+          )}
         </div>
       </div>
 
       {/* Goals List */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         {goals.map((goal) => (
-          <div key={goal.id} className="flex items-start gap-2 group">
+          <div key={goal.id} className="flex items-start gap-2.5 group p-1.5 rounded-md hover:bg-accent/30 transition-colors">
             <Checkbox checked={goal.is_completed} onCheckedChange={() => onToggleGoal(goal)} className="mt-0.5" />
             {editingGoalId === goal.id ? (
               <Input
@@ -104,8 +115,8 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
             ) : (
               <div className="flex-1 min-w-0">
                 <p
-                  className={`text-sm leading-relaxed break-words cursor-pointer ${
-                    goal.is_completed ? "line-through text-muted-foreground" : "text-foreground"
+                  className={`text-sm leading-relaxed break-words cursor-pointer transition-colors ${
+                    goal.is_completed ? "line-through text-muted-foreground/70" : "text-foreground"
                   }`}
                   onClick={() => startEdit(goal.id, goal.goal_text)}
                 >
@@ -115,10 +126,10 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
             )}
             <button
               onClick={() => onDeleteGoal(goal)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-0.5 rounded hover:bg-destructive/10"
               aria-label="Delete goal"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3.5 w-3.5" />
             </button>
           </div>
         ))}
@@ -130,7 +141,7 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
           onBlur={handleAddGoal}
           onKeyDown={handleKeyDown}
           placeholder="Add goal..."
-          className="inline-add-input text-sm"
+          className="inline-add-input text-sm mt-1"
         />
       </div>
     </Card>

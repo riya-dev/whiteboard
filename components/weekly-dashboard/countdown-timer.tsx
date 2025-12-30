@@ -76,9 +76,9 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (!event && !isEditing) {
     return (
-      <div className="inline-block">
-        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-2">
+      <div className="inline-block h-14">
+        <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
+          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
             <Button
               variant="ghost"
               onClick={() => setIsEditing(true)}
@@ -94,9 +94,9 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (isEditing) {
     return (
-      <div className="inline-block">
-        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-2">
+      <div className="inline-block h-14">
+        <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
+          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
             <div className="flex items-center gap-2">
               <Input
                 type="text"
@@ -155,9 +155,9 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
   if (event) {
     const { weeks, days } = calculateCountdown(event.target_date)
     return (
-      <div className="inline-block group">
-        <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <CardContent className="p-2">
+      <div className="inline-block group h-14">
+        <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
+          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
             <div className="flex items-start gap-2">
               <div>
                 <div className="text-lg font-semibold text-primary leading-tight">

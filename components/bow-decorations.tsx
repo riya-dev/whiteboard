@@ -77,6 +77,36 @@ export function BowDecorations() {
           <circle cx="30" cy="30" r="4" fill="var(--primary)" />
         </svg>
       </div>
+
+      {/* Extra scattered bows for richer background */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 opacity-10 dark:opacity-5 rotate-3">
+        <svg width="48" height="48" viewBox="0 0 60 60" fill="none">
+          <path d="M30 30 Q20 15 10 20 Q5 22 8 28 Q12 32 18 30 L30 30 Q32 35 28 40 Q24 42 20 38 Q18 34 22 30 Z" fill="var(--primary)" />
+          <path d="M30 30 Q40 15 50 20 Q55 22 52 28 Q48 32 42 30 L30 30 Q28 35 32 40 Q36 42 40 38 Q42 34 38 30 Z" fill="var(--primary)" />
+          <circle cx="30" cy="30" r="4" fill="var(--primary)" />
+        </svg>
+      </div>
+      <div className="absolute top-1/4 right-1/3 opacity-8 dark:opacity-4 -rotate-12">
+        <svg width="36" height="36" viewBox="0 0 60 60" fill="none">
+          <path d="M30 30 Q20 15 10 20 Q5 22 8 28 Q12 32 18 30 L30 30 Q32 35 28 40 Q24 42 20 38 Q18 34 22 30 Z" fill="var(--primary)" />
+          <path d="M30 30 Q40 15 50 20 Q55 22 52 28 Q48 32 42 30 L30 30 Q28 35 32 40 Q36 42 40 38 Q42 34 38 30 Z" fill="var(--primary)" />
+          <circle cx="30" cy="30" r="4" fill="var(--primary)" />
+        </svg>
+      </div>
+      <div className="absolute bottom-1/3 left-1/4 opacity-12 dark:opacity-6 rotate-6">
+        <svg width="44" height="44" viewBox="0 0 60 60" fill="none">
+          <path d="M30 30 Q20 15 10 20 Q5 22 8 28 Q12 32 18 30 L30 30 Q32 35 28 40 Q24 42 20 38 Q18 34 22 30 Z" fill="var(--primary)" />
+          <path d="M30 30 Q40 15 50 20 Q55 22 52 28 Q48 32 42 30 L30 30 Q28 35 32 40 Q36 42 40 38 Q42 34 38 30 Z" fill="var(--primary)" />
+          <circle cx="30" cy="30" r="4" fill="var(--primary)" />
+        </svg>
+      </div>
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-10 dark:opacity-5 -rotate-3">
+        <svg width="52" height="52" viewBox="0 0 60 60" fill="none">
+          <path d="M30 30 Q20 15 10 20 Q5 22 8 28 Q12 32 18 30 L30 30 Q32 35 28 40 Q24 42 20 38 Q18 34 22 30 Z" fill="var(--primary)" />
+          <path d="M30 30 Q40 15 50 20 Q55 22 52 28 Q48 32 42 30 L30 30 Q28 35 32 40 Q36 42 40 38 Q42 34 38 30 Z" fill="var(--primary)" />
+          <circle cx="30" cy="30" r="4" fill="var(--primary)" />
+        </svg>
+      </div>
     </div>
   )
 }
