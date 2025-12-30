@@ -225,16 +225,50 @@ export function isDateInWeek(date: Date, weekStart: Date): boolean {
 }
 
 /**
- * Get biweekly period start for a given date
- * Biweekly periods are 14 days starting from a Tuesday
- * @param date - Any date
- * @returns The Tuesday that starts the current biweekly period
+ * Check if current week is within a biweekly period
+ * @param goalPeriodStart - The Tuesday that starts the biweekly period (from database)
+ * @param currentWeekStart - The Tuesday of the week being viewed
+ * @returns True if current week is in week 1 or week 2 of the biweekly period
  */
-export function getBiweeklyPeriodStart(date: Date): Date {
-  // For simplicity, we'll use the week start and check if it's an even/odd week
-  // A more robust implementation would store the first biweekly period start
-  // and calculate from there
-  return getTuesdayWeekStart(date)
+export function isInBiweeklyPeriod(goalPeriodStart: Date | string, currentWeekStart: Date | string): boolean {
+  const periodStart = typeof goalPeriodStart === "string" ? parseDate(goalPeriodStart) : new Date(goalPeriodStart)
+  const currentStart = typeof currentWeekStart === "string" ? parseDate(currentWeekStart) : new Date(currentWeekStart)
+
+  // Normalize to midnight
+  periodStart.setHours(0, 0, 0, 0)
+  currentStart.setHours(0, 0, 0, 0)
+
+  // Calculate difference in days
+  const diffMs = currentStart.getTime() - periodStart.getTime()
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000))
+
+  // Goal is visible if we're in the 14-day period (days 0-13)
+  return diffDays >= 0 && diffDays < 14
+}
+
+/**
+ * Get the Monday that ends a biweekly period
+ * @param periodStartTuesday - The Tuesday that starts the biweekly period
+ * @returns The Monday that ends the period (13 days after Tuesday)
+ */
+export function getBiweeklyEndMonday(periodStartTuesday: Date | string): Date {
+  const tuesday = typeof periodStartTuesday === "string" ? parseDate(periodStartTuesday) : new Date(periodStartTuesday)
+  const monday = new Date(tuesday)
+  monday.setDate(tuesday.getDate() + 13) // Tuesday + 13 days = Monday of week 2
+  return monday
+}
+
+/**
+ * Format biweekly end date for display
+ * @param endMonday - The Monday that ends the biweekly period
+ * @returns Formatted string like "Monday, Jan 6"
+ */
+export function formatBiweeklyEndDate(endMonday: Date): string {
+  return endMonday.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  })
 }
 
 /**
