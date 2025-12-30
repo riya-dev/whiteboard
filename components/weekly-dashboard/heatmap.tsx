@@ -1,6 +1,6 @@
 "use client"
 
-import { groupHeatmapByWeeks, getMonthLabelsForHeatmap } from "@/lib/date-utils"
+import HeatMap from "@uiw/react-heat-map"
 import type { HeatmapDay } from "@/lib/date-utils"
 
 interface HeatmapProps {
@@ -10,18 +10,50 @@ interface HeatmapProps {
 }
 
 export function Heatmap({ title, data, colorScale }: HeatmapProps) {
-  const weeks = groupHeatmapByWeeks(data)
-  const monthLabels = getMonthLabelsForHeatmap(data)
+  // Debug: log data length and sample
+  console.log(`${title} - Total days:`, data.length)
+  console.log(`${title} - First day:`, data[0])
+  console.log(`${title} - Last day:`, data[data.length - 1])
+  console.log(`${title} - Sample with data:`, data.filter(d => (d.count ?? 0) > 0))
 
+  // Transform data to react-heat-map format
+  // The library uses the 'count' field to determine color, so we'll map intensity to count ranges
+  const heatmapValue = data.map((day) => ({
+    date: day.date.replace(/-/g, "/"), // Convert YYYY-MM-DD to YYYY/MM/DD for Safari support
+    count: day.intensity, // Use intensity (0-4) directly as count for color mapping
+    content: `${day.count || 0}/${day.total || 0}`, // Store actual count/total for tooltip
+  }))
+
+  // Get color based on intensity level (0-4)
   const getColor = (intensity: number): string => {
     const prefix = colorScale === "goals" ? "heatmap-goals" : "heatmap-discipline"
     return `var(--${prefix}-${intensity})`
   }
 
-  const dayLabels = ["S", "M", "T", "W", "T", "F", "S"]
+  // Create color mapping based on intensity (0-4)
+  // Using object format to map exact count values to colors
+  const panelColors = {
+    0: getColor(0),
+    1: getColor(1),
+    2: getColor(2),
+    3: getColor(3),
+    4: getColor(4),
+  }
+
+  // Get the earliest and latest dates from data
+  const startDate =
+    data.length > 0 ? new Date(data[0].date.replace(/-/g, "/")) : new Date()
+  const endDate =
+    data.length > 0
+      ? new Date(data[data.length - 1].date.replace(/-/g, "/"))
+      : new Date()
+
+  console.log(`${title} - Start date:`, startDate)
+  console.log(`${title} - End date:`, endDate)
+  console.log(`${title} - Heatmap value length:`, heatmapValue.length)
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-foreground">{title}</h3>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -39,78 +71,31 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
         </div>
       </div>
 
-      <div className="flex gap-2">
-        {/* Day of week labels */}
-        <div className="flex flex-col justify-start pt-5">
-          <div className="flex flex-col gap-[3px]">
-            {dayLabels.map((label, index) => (
-              <div
-                key={index}
-                className="text-xs text-muted-foreground w-4 h-[11px] flex items-center"
-              >
-                {index % 2 === 1 ? label : ""}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Scrollable container for month labels and heatmap */}
-        <div className="flex-1 overflow-x-auto">
-          {/* Month labels */}
-          <div className="relative mb-1 h-4">
-            {monthLabels.map(({ month, weekIndex }) => (
-              <div
-                key={`${month}-${weekIndex}`}
-                className="absolute text-xs text-muted-foreground"
-                style={{
-                  left: `${weekIndex * 14}px`,
-                }}
-              >
-                {month}
-              </div>
-            ))}
-          </div>
-
-          {/* Heatmap grid */}
-          <div className="heatmap-grid">
-            {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} className="heatmap-week">
-                {/* Pad beginning of first week if it doesn't start on Sunday */}
-                {weekIndex === 0 &&
-                  week.length > 0 &&
-                  Array.from({ length: new Date(week[0].date).getDay() }).map((_, padIndex) => (
-                    <div key={`pad-start-${padIndex}`} className="w-[11px] h-[11px]" />
-                  ))}
-
-                {week.map((day) => {
-                  const date = new Date(day.date)
-                  const tooltipText = `${date.toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}: ${day.count || 0}/${day.total || 0}`
-
-                  return (
-                    <div
-                      key={day.date}
-                      className="heatmap-day"
-                      style={{ backgroundColor: getColor(day.intensity) }}
-                      title={tooltipText}
-                    />
-                  )
-                })}
-
-                {/* Pad end of last week if it doesn't end on Saturday */}
-                {weekIndex === weeks.length - 1 &&
-                  week.length > 0 &&
-                  Array.from({
-                    length: 6 - new Date(week[week.length - 1].date).getDay(),
-                  }).map((_, padIndex) => (
-                    <div key={`pad-end-${padIndex}`} className="w-[11px] h-[11px]" />
-                  ))}
-              </div>
-            ))}
-          </div>
+      <div className="overflow-x-auto">
+        <div style={{ minWidth: 'fit-content' }}>
+          <HeatMap
+            value={heatmapValue}
+            startDate={startDate}
+            endDate={endDate}
+            panelColors={panelColors}
+            weekLabels={["", "M", "", "W", "", "F", ""]}
+            rectSize={11}
+            space={3}
+            width={800}
+            rectProps={{
+              rx: 2,
+            }}
+            legendRender={() => <div />}
+            rectRender={(props, data) => {
+              const intensity = (data as any).count || 0
+              return (
+                <rect
+                  {...props}
+                  fill={getColor(intensity)}
+                />
+              )
+            }}
+          />
         </div>
       </div>
     </div>
