@@ -1,6 +1,8 @@
 {
-  "name": "my-v0-project",
+  "name": "whiteboard",
   "version": "0.1.0",
+  "description": "Your personal productivity planner with goals, habits, and insights",
+  "author": "Riya",
   "private": true,
   "scripts": {
     "build": "next build",

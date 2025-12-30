@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <!-- Whiteboard frame (cute rounded rectangle with pink border) -->
+  <rect x="64" y="80" width="384" height="320" rx="24" fill="#ffffff" stroke="#f43f5e" stroke-width="12"/>
+
+  <!-- Inner shadow/depth -->
+  <rect x="80" y="96" width="352" height="288" rx="16" fill="#fef2f2"/>
+
+  <!-- Cute checkmarks and tasks (pink) -->
+  <g stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none">
+    <!-- Checkmark 1 -->
+    <path d="M 120 160 L 135 175 L 165 145"/>
+    <!-- Line 1 -->
+    <line x1="185" y1="160" x2="360" y2="160"/>
+
+    <!-- Checkmark 2 -->
+    <path d="M 120 220 L 135 235 L 165 205"/>
+    <!-- Line 2 -->
+    <line x1="185" y1="220" x2="360" y2="220"/>
+
+    <!-- Circle (incomplete task) -->
+    <circle cx="135" cy="280" r="15"/>
+    <!-- Line 3 -->
+    <line x1="185" y1="280" x2="300" y2="280"/>
+
+    <!-- Circle (incomplete task) -->
+    <circle cx="135" cy="340" r="15"/>
+    <!-- Line 4 -->
+    <line x1="185" y1="340" x2="280" y2="340"/>
+  </g>
+
+  <!-- Cute marker/pen at bottom right -->
+  <g>
+    <!-- Marker body -->
+    <rect x="380" y="410" width="80" height="28" rx="14" fill="#ec4899" transform="rotate(-30 420 424)"/>
+    <!-- Marker tip -->
+    <ellipse cx="448" cy="448" rx="12" ry="8" fill="#db2777" transform="rotate(-30 448 448)"/>
+    <!-- Marker cap -->
+    <circle cx="392" cy="400" r="8" fill="#f9a8d4"/>
+  </g>
+
+  <!-- Cute sparkles -->
+  <g fill="#f9a8d4">
+    <path d="M 420 100 L 422 108 L 430 110 L 422 112 L 420 120 L 418 112 L 410 110 L 418 108 Z"/>
+    <path d="M 100 380 L 101 385 L 106 386 L 101 387 L 100 392 L 99 387 L 94 386 L 99 385 Z"/>
+    <path d="M 450 140 L 451 145 L 456 146 L 451 147 L 450 152 L 449 147 L 444 146 L 449 145 Z"/>
+  </g>
+</svg>
