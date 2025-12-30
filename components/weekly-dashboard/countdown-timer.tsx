@@ -24,7 +24,8 @@ interface CountdownTimerProps {
 
 function calculateCountdown(targetDate: string): { weeks: number; days: number } {
   const now = new Date()
-  const target = new Date(targetDate)
+  // Parse as local time to avoid timezone issues
+  const target = new Date(targetDate + "T00:00:00")
   const diffMs = target.getTime() - now.getTime()
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 
@@ -42,7 +43,8 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
   const handleEdit = () => {
     if (event) {
       setEventName(event.event_name)
-      setSelectedDate(new Date(event.target_date))
+      // Parse as local time to avoid timezone issues
+      setSelectedDate(new Date(event.target_date + "T00:00:00"))
       setIsEditing(true)
     }
   }
@@ -158,7 +160,8 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (event) {
     const { weeks, days } = calculateCountdown(event.target_date)
-    const targetDate = new Date(event.target_date)
+    // Parse as local time to avoid timezone issues
+    const targetDate = new Date(event.target_date + "T00:00:00")
     const formattedDate = format(targetDate, "EEE, MMM d, yyyy").toUpperCase()
 
     return (
