@@ -16,16 +16,11 @@ interface DailyGridProps {
   dailyGoals: Record<string, DailyGoal[]>
   onToggleGoal: (goal: DailyGoal) => void
   onAddGoal: (dateStr: string, goalText: string) => void
+  onUpdateGoal: (goalId: string, dateStr: string, goalText: string) => void
   onDeleteGoal: (goal: DailyGoal) => void
 }
 
-export function DailyGrid({
-  weekDates,
-  dailyGoals,
-  onToggleGoal,
-  onAddGoal,
-  onDeleteGoal,
-}: DailyGridProps) {
+export function DailyGrid({ weekDates, dailyGoals, onToggleGoal, onAddGoal, onUpdateGoal, onDeleteGoal }: DailyGridProps) {
   return (
     <div className="daily-grid">
       {weekDates.map((date) => {
@@ -40,6 +35,7 @@ export function DailyGrid({
             goals={goals}
             onToggleGoal={onToggleGoal}
             onAddGoal={(goalText) => onAddGoal(dateStr, goalText)}
+            onUpdateGoal={(goalId, goalText) => onUpdateGoal(goalId, dateStr, goalText)}
             onDeleteGoal={onDeleteGoal}
           />
         )

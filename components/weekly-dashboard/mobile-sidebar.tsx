@@ -1,22 +1,37 @@
 "use client"
 
 import { SidebarWeekly } from "./sidebar-weekly"
+import type { LookaheadItem } from "./lookahead-list"
 
-interface LookaheadData {
-  this_week_text: string
-  next_week_text: string
-  learnings_text: string
+interface WeeklyGoal {
+  id: string
+  goal_text: string
+  is_completed: boolean
+  cadence: "weekly" | "biweekly"
+  period_start_date: string
 }
 
 interface MobileSidebarProps {
-  lookahead: LookaheadData
-  onUpdateLookahead: (field: keyof LookaheadData, value: string) => void
+  weeklyGoals: WeeklyGoal[]
+  cadence: "weekly" | "biweekly"
+  onToggleWeeklyGoal: (id: string) => void
+  onAddWeeklyGoal: (text: string) => void
+  onUpdateWeeklyGoal: (id: string, text: string) => void
+  onDeleteWeeklyGoal: (id: string) => void
+  onCadenceChange: (cadence: "weekly" | "biweekly") => void
+  thisWeekItems: LookaheadItem[]
+  nextWeekItems: LookaheadItem[]
+  onAddLookaheadItem: (section: "this_week" | "next_week", text: string) => void
+  onUpdateLookaheadItem: (id: string, text: string) => void
+  onDeleteLookaheadItem: (id: string) => void
+  learningsText: string
+  onUpdateLearnings: (text: string) => void
 }
 
-export function MobileSidebar({ lookahead, onUpdateLookahead }: MobileSidebarProps) {
+export function MobileSidebar(props: MobileSidebarProps) {
   return (
     <div className="mobile-sidebar-stack mb-6">
-      <SidebarWeekly lookahead={lookahead} onUpdateLookahead={onUpdateLookahead} />
+      <SidebarWeekly {...props} />
     </div>
   )
 }

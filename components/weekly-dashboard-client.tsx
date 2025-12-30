@@ -3,19 +3,19 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import { getTuesdayWeekStart, getTuesdayWeekDates, formatDate, getLast365Days } from "@/lib/date-utils"
+import { getTuesdayWeekStart, getTuesdayWeekDates, formatDate, getLast365Days, isInBiweeklyPeriod } from "@/lib/date-utils"
 import type { DailyGoalData, DisciplineTrackingData } from "@/lib/completion-utils"
 
 // Components
 import { DashboardHeader } from "./weekly-dashboard/header"
 import { SidebarWeekly } from "./weekly-dashboard/sidebar-weekly"
 import { MobileSidebar } from "./weekly-dashboard/mobile-sidebar"
-import { WeeklyGoalsCard } from "./weekly-dashboard/weekly-goals-card"
 import { DailyGrid } from "./weekly-dashboard/daily-grid"
 import { DisciplineCard } from "./weekly-dashboard/discipline-card"
 import { GoalsHeatmap } from "./weekly-dashboard/heatmap-goals"
 import { DisciplineHeatmap } from "./weekly-dashboard/heatmap-discipline"
 import { Card } from "./ui/card"
+import type { LookaheadItem } from "./weekly-dashboard/lookahead-list"
 
 // ===== TYPE DEFINITIONS =====
 
@@ -38,15 +38,6 @@ interface WeeklyGoal {
   goal_order: number
 }
 
-interface Lookahead {
-  id?: string
-  user_id?: string
-  week_start_date: string
-  this_week_text: string
-  next_week_text: string
-  learnings_text: string
-}
-
 interface DisciplineTracking {
   id?: string
   user_id?: string
@@ -67,12 +58,9 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
   const [dailyGoals, setDailyGoals] = useState<Record<string, DailyGoal[]>>({})
   const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>([])
   const [weeklyGoalsCadence, setWeeklyGoalsCadence] = useState<"weekly" | "biweekly">("weekly")
-  const [lookahead, setLookahead] = useState<Lookahead>({
-    week_start_date: formatDate(currentWeekStart),
-    this_week_text: "",
-    next_week_text: "",
-    learnings_text: "",
-  })
+  const [thisWeekItems, setThisWeekItems] = useState<LookaheadItem[]>([])
+  const [nextWeekItems, setNextWeekItems] = useState<LookaheadItem[]>([])
+  const [learningsText, setLearningsText] = useState<string>("")
   const [disciplineTracking, setDisciplineTracking] = useState<DisciplineTracking[]>([])
 
   // Heatmap data (365 days)
@@ -104,35 +92,59 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     })
     setDailyGoals(goalsByDate)
 
-    // Load weekly goals for this period
-    const { data: weeklyGoalsData } = await supabase
+    // Load weekly goals for this period (including biweekly support)
+    // Fetch goals for this week AND last week (in case of biweekly)
+    const lastWeekStart = new Date(currentWeekStart)
+    lastWeekStart.setDate(currentWeekStart.getDate() - 7)
+    const lastWeekStartStr = formatDate(lastWeekStart)
+
+    const { data: allWeeklyGoalsData } = await supabase
       .from("weekly_goals")
       .select("*")
-      .eq("period_start_date", weekStartStr)
+      .in("period_start_date", [weekStartStr, lastWeekStartStr])
       .order("goal_order")
 
-    setWeeklyGoals(weeklyGoalsData || [])
-    if (weeklyGoalsData && weeklyGoalsData.length > 0) {
-      setWeeklyGoalsCadence(weeklyGoalsData[0].cadence)
+    // Filter to show goals that are relevant for current week
+    const relevantGoals = (allWeeklyGoalsData || []).filter((goal) => {
+      if (goal.cadence === "weekly") {
+        return goal.period_start_date === weekStartStr
+      } else {
+        // Biweekly: show if current week is within the 14-day period
+        return isInBiweeklyPeriod(goal.period_start_date, weekStartStr)
+      }
+    })
+
+    setWeeklyGoals(relevantGoals)
+    if (relevantGoals.length > 0) {
+      setWeeklyGoalsCadence(relevantGoals[0].cadence)
     }
 
-    // Load lookahead for this week
-    const { data: lookaheadData } = await supabase
-      .from("lookahead")
+    // Load lookahead items for this week
+    const { data: lookaheadItemsData } = await supabase
+      .from("lookahead_items")
       .select("*")
+      .eq("week_start_date", weekStartStr)
+      .order("item_order")
+
+    const thisWeek = (lookaheadItemsData || [])
+      .filter((item) => item.section_type === "this_week")
+      .map((item) => ({ id: item.id, item_text: item.item_text, item_order: item.item_order }))
+
+    const nextWeek = (lookaheadItemsData || [])
+      .filter((item) => item.section_type === "next_week")
+      .map((item) => ({ id: item.id, item_text: item.item_text, item_order: item.item_order }))
+
+    setThisWeekItems(thisWeek)
+    setNextWeekItems(nextWeek)
+
+    // Load learnings for this week
+    const { data: learningsData } = await supabase
+      .from("lookahead")
+      .select("learnings_text")
       .eq("week_start_date", weekStartStr)
       .maybeSingle()
 
-    if (lookaheadData) {
-      setLookahead(lookaheadData)
-    } else {
-      setLookahead({
-        week_start_date: weekStartStr,
-        this_week_text: "",
-        next_week_text: "",
-        learnings_text: "",
-      })
-    }
+    setLearningsText(learningsData?.learnings_text || "")
 
     // Load discipline tracking for this week
     const { data: disciplineData } = await supabase
@@ -208,6 +220,22 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     }
   }
 
+  async function handleUpdateDailyGoal(goalId: string, goalDate: string, newText: string) {
+    if (!newText.trim()) return
+
+    const { error } = await supabase
+      .from("daily_goals")
+      .update({ goal_text: newText.trim() })
+      .eq("id", goalId)
+
+    if (!error) {
+      setDailyGoals((prev) => ({
+        ...prev,
+        [goalDate]: prev[goalDate].map((g) => (g.id === goalId ? { ...g, goal_text: newText.trim() } : g)),
+      }))
+    }
+  }
+
   async function handleDeleteDailyGoal(goal: DailyGoal) {
     const { error } = await supabase.from("daily_goals").delete().eq("id", goal.id)
 
@@ -223,32 +251,39 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
   // ===== WEEKLY GOALS HANDLERS =====
 
-  async function handleToggleWeeklyGoal(goal: WeeklyGoal) {
+  async function handleToggleWeeklyGoal(goalId: string) {
+    const goal = weeklyGoals.find((g) => g.id === goalId)
+    if (!goal) return
+
     const { error } = await supabase
       .from("weekly_goals")
       .update({ is_completed: !goal.is_completed })
-      .eq("id", goal.id)
+      .eq("id", goalId)
 
     if (!error) {
-      setWeeklyGoals((prev) =>
-        prev.map((g) => (g.id === goal.id ? { ...g, is_completed: !g.is_completed } : g))
-      )
+      setWeeklyGoals((prev) => prev.map((g) => (g.id === goalId ? { ...g, is_completed: !g.is_completed } : g)))
     }
   }
 
-  async function handleAddWeeklyGoal(goalText: string, cadence: "weekly" | "biweekly") {
+  async function handleAddWeeklyGoal(goalText: string) {
     if (!goalText.trim()) return
 
     const goalOrder = weeklyGoals.length + 1
-    const weekStartStr = formatDate(currentWeekStart)
+    // Determine period start based on cadence
+    let periodStart = formatDate(currentWeekStart)
+
+    // If biweekly and we're in week 2, use last week's Tuesday as period start
+    if (weeklyGoalsCadence === "biweekly" && weeklyGoals.length > 0) {
+      periodStart = weeklyGoals[0].period_start_date
+    }
 
     const { data, error } = await supabase
       .from("weekly_goals")
       .insert({
         user_id: user.id,
-        period_start_date: weekStartStr,
-        cadence,
-        goal_text: goalText,
+        period_start_date: periodStart,
+        cadence: weeklyGoalsCadence,
+        goal_text: goalText.trim(),
         goal_order: goalOrder,
         is_completed: false,
       })
@@ -260,38 +295,125 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     }
   }
 
-  async function handleDeleteWeeklyGoal(goal: WeeklyGoal) {
-    const { error } = await supabase.from("weekly_goals").delete().eq("id", goal.id)
+  async function handleUpdateWeeklyGoal(goalId: string, newText: string) {
+    if (!newText.trim()) return
+
+    const { error } = await supabase
+      .from("weekly_goals")
+      .update({ goal_text: newText.trim() })
+      .eq("id", goalId)
 
     if (!error) {
-      setWeeklyGoals((prev) => prev.filter((g) => g.id !== goal.id))
+      setWeeklyGoals((prev) => prev.map((g) => (g.id === goalId ? { ...g, goal_text: newText.trim() } : g)))
+    }
+  }
+
+  async function handleDeleteWeeklyGoal(goalId: string) {
+    const { error } = await supabase.from("weekly_goals").delete().eq("id", goalId)
+
+    if (!error) {
+      setWeeklyGoals((prev) => prev.filter((g) => g.id !== goalId))
     }
   }
 
   async function handleCadenceChange(cadence: "weekly" | "biweekly") {
+    const oldCadence = weeklyGoalsCadence
     setWeeklyGoalsCadence(cadence)
-    // Update all weekly goals for this period to new cadence
-    const weekStartStr = formatDate(currentWeekStart)
-    await supabase
-      .from("weekly_goals")
-      .update({ cadence })
-      .eq("period_start_date", weekStartStr)
 
-    setWeeklyGoals((prev) => prev.map((g) => ({ ...g, cadence })))
+    // When switching cadences, update the period_start_date if needed
+    const weekStartStr = formatDate(currentWeekStart)
+
+    if (oldCadence === "biweekly" && cadence === "weekly") {
+      // Switching from biweekly to weekly: update period_start_date to current week
+      await supabase
+        .from("weekly_goals")
+        .update({ cadence, period_start_date: weekStartStr })
+        .in(
+          "id",
+          weeklyGoals.map((g) => g.id)
+        )
+
+      setWeeklyGoals((prev) => prev.map((g) => ({ ...g, cadence, period_start_date: weekStartStr })))
+    } else {
+      // Just update the cadence
+      await supabase
+        .from("weekly_goals")
+        .update({ cadence })
+        .in(
+          "id",
+          weeklyGoals.map((g) => g.id)
+        )
+
+      setWeeklyGoals((prev) => prev.map((g) => ({ ...g, cadence })))
+    }
   }
 
-  // ===== LOOKAHEAD HANDLERS =====
+  // ===== LOOKAHEAD ITEMS HANDLERS =====
 
-  async function handleUpdateLookahead(
-    field: keyof Lookahead,
-    value: string
-  ) {
+  async function handleAddLookaheadItem(section: "this_week" | "next_week", text: string) {
+    if (!text.trim()) return
+
     const weekStartStr = formatDate(currentWeekStart)
+    const currentItems = section === "this_week" ? thisWeekItems : nextWeekItems
+    const itemOrder = currentItems.length + 1
 
-    const updatedLookahead = { ...lookahead, [field]: value }
-    setLookahead(updatedLookahead)
+    const { data, error } = await supabase
+      .from("lookahead_items")
+      .insert({
+        user_id: user.id,
+        week_start_date: weekStartStr,
+        section_type: section,
+        item_text: text.trim(),
+        item_order: itemOrder,
+      })
+      .select()
+      .single()
 
-    // Upsert to database (debounced in production, but immediate here for simplicity)
+    if (!error && data) {
+      const newItem: LookaheadItem = {
+        id: data.id,
+        item_text: data.item_text,
+        item_order: data.item_order,
+      }
+
+      if (section === "this_week") {
+        setThisWeekItems((prev) => [...prev, newItem])
+      } else {
+        setNextWeekItems((prev) => [...prev, newItem])
+      }
+    }
+  }
+
+  async function handleUpdateLookaheadItem(id: string, newText: string) {
+    if (!newText.trim()) return
+
+    const { error } = await supabase
+      .from("lookahead_items")
+      .update({ item_text: newText.trim() })
+      .eq("id", id)
+
+    if (!error) {
+      setThisWeekItems((prev) => prev.map((item) => (item.id === id ? { ...item, item_text: newText.trim() } : item)))
+      setNextWeekItems((prev) => prev.map((item) => (item.id === id ? { ...item, item_text: newText.trim() } : item)))
+    }
+  }
+
+  async function handleDeleteLookaheadItem(id: string) {
+    const { error } = await supabase.from("lookahead_items").delete().eq("id", id)
+
+    if (!error) {
+      setThisWeekItems((prev) => prev.filter((item) => item.id !== id))
+      setNextWeekItems((prev) => prev.filter((item) => item.id !== id))
+    }
+  }
+
+  // ===== LEARNINGS HANDLER =====
+
+  async function handleUpdateLearnings(text: string) {
+    const weekStartStr = formatDate(currentWeekStart)
+    setLearningsText(text)
+
+    // Upsert to database
     const { data: existing } = await supabase
       .from("lookahead")
       .select("id")
@@ -299,12 +421,12 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
       .maybeSingle()
 
     if (existing) {
-      await supabase.from("lookahead").update({ [field]: value }).eq("id", existing.id)
+      await supabase.from("lookahead").update({ learnings_text: text }).eq("id", existing.id)
     } else {
       await supabase.from("lookahead").insert({
         user_id: user.id,
         week_start_date: weekStartStr,
-        [field]: value,
+        learnings_text: text,
       })
     }
   }
@@ -372,41 +494,58 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Sidebar (Desktop) */}
           <div className="hidden lg:block lg:col-span-3">
-            <SidebarWeekly lookahead={lookahead} onUpdateLookahead={handleUpdateLookahead} />
+            <SidebarWeekly
+              weeklyGoals={weeklyGoals}
+              cadence={weeklyGoalsCadence}
+              onToggleWeeklyGoal={handleToggleWeeklyGoal}
+              onAddWeeklyGoal={handleAddWeeklyGoal}
+              onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
+              onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
+              onCadenceChange={handleCadenceChange}
+              thisWeekItems={thisWeekItems}
+              nextWeekItems={nextWeekItems}
+              onAddLookaheadItem={handleAddLookaheadItem}
+              onUpdateLookaheadItem={handleUpdateLookaheadItem}
+              onDeleteLookaheadItem={handleDeleteLookaheadItem}
+              learningsText={learningsText}
+              onUpdateLearnings={handleUpdateLearnings}
+            />
           </div>
 
           {/* Mobile Sidebar */}
           <div className="lg:hidden col-span-1">
-            <MobileSidebar lookahead={lookahead} onUpdateLookahead={handleUpdateLookahead} />
+            <MobileSidebar
+              weeklyGoals={weeklyGoals}
+              cadence={weeklyGoalsCadence}
+              onToggleWeeklyGoal={handleToggleWeeklyGoal}
+              onAddWeeklyGoal={handleAddWeeklyGoal}
+              onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
+              onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
+              onCadenceChange={handleCadenceChange}
+              thisWeekItems={thisWeekItems}
+              nextWeekItems={nextWeekItems}
+              onAddLookaheadItem={handleAddLookaheadItem}
+              onUpdateLookaheadItem={handleUpdateLookaheadItem}
+              onDeleteLookaheadItem={handleDeleteLookaheadItem}
+              learningsText={learningsText}
+              onUpdateLearnings={handleUpdateLearnings}
+            />
           </div>
 
           {/* Main Content */}
           <div className="lg:col-span-9 space-y-6">
-            {/* Weekly Goals */}
-            <WeeklyGoalsCard
-              goals={weeklyGoals}
-              cadence={weeklyGoalsCadence}
-              onCadenceChange={handleCadenceChange}
-              onToggleGoal={handleToggleWeeklyGoal}
-              onAddGoal={handleAddWeeklyGoal}
-              onDeleteGoal={handleDeleteWeeklyGoal}
-            />
-
             {/* Daily Grid */}
             <DailyGrid
               weekDates={weekDates}
               dailyGoals={dailyGoals}
               onToggleGoal={handleToggleDailyGoal}
               onAddGoal={handleAddDailyGoal}
+              onUpdateGoal={handleUpdateDailyGoal}
               onDeleteGoal={handleDeleteDailyGoal}
             />
 
             {/* Discipline */}
-            <DisciplineCard
-              weekDates={weekDates}
-              tracking={disciplineTracking}
-              onToggle={handleToggleDiscipline}
-            />
+            <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
 
             {/* Heatmaps */}
             <div className="grid grid-cols-1 gap-6">

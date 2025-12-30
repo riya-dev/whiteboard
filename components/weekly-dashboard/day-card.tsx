@@ -20,18 +20,14 @@ interface DayCardProps {
   goals: DailyGoal[]
   onToggleGoal: (goal: DailyGoal) => void
   onAddGoal: (goalText: string) => void
+  onUpdateGoal: (goalId: string, goalText: string) => void
   onDeleteGoal: (goal: DailyGoal) => void
 }
 
-export function DayCard({
-  date,
-  dateStr,
-  goals,
-  onToggleGoal,
-  onAddGoal,
-  onDeleteGoal,
-}: DayCardProps) {
+export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdateGoal, onDeleteGoal }: DayCardProps) {
   const [newGoalText, setNewGoalText] = useState("")
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
+  const [editGoalText, setEditGoalText] = useState("")
   const today = isToday(date)
   const dayName = getDayName(date)
   const dayNum = getDayNumber(date)
@@ -47,6 +43,29 @@ export function DayCard({
     if (e.key === "Enter") {
       e.preventDefault()
       handleAddGoal()
+    }
+  }
+
+  const startEdit = (goalId: string, currentText: string) => {
+    setEditingGoalId(goalId)
+    setEditGoalText(currentText)
+  }
+
+  const saveEdit = () => {
+    if (editingGoalId && editGoalText.trim()) {
+      onUpdateGoal(editingGoalId, editGoalText.trim())
+    }
+    setEditingGoalId(null)
+    setEditGoalText("")
+  }
+
+  const handleEditKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      saveEdit()
+    } else if (e.key === "Escape") {
+      setEditingGoalId(null)
+      setEditGoalText("")
     }
   }
 
@@ -71,20 +90,29 @@ export function DayCard({
       <div className="space-y-2">
         {goals.map((goal) => (
           <div key={goal.id} className="flex items-start gap-2 group">
-            <Checkbox
-              checked={goal.is_completed}
-              onCheckedChange={() => onToggleGoal(goal)}
-              className="mt-0.5"
-            />
-            <div className="flex-1 min-w-0">
-              <p
-                className={`text-sm leading-relaxed break-words ${
-                  goal.is_completed ? "line-through text-muted-foreground" : "text-foreground"
-                }`}
-              >
-                {goal.goal_text}
-              </p>
-            </div>
+            <Checkbox checked={goal.is_completed} onCheckedChange={() => onToggleGoal(goal)} className="mt-0.5" />
+            {editingGoalId === goal.id ? (
+              <Input
+                type="text"
+                value={editGoalText}
+                onChange={(e) => setEditGoalText(e.target.value)}
+                onKeyDown={handleEditKeyDown}
+                onBlur={saveEdit}
+                className="flex-1 h-7 text-sm"
+                autoFocus
+              />
+            ) : (
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`text-sm leading-relaxed break-words cursor-pointer ${
+                    goal.is_completed ? "line-through text-muted-foreground" : "text-foreground"
+                  }`}
+                  onClick={() => startEdit(goal.id, goal.goal_text)}
+                >
+                  {goal.goal_text}
+                </p>
+              </div>
+            )}
             <button
               onClick={() => onDeleteGoal(goal)}
               className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
