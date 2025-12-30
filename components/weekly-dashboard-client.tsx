@@ -491,68 +491,75 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         <DashboardHeader weekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} />
 
         {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Sidebar (Desktop) */}
-          <div className="hidden lg:block lg:col-span-3">
-            <SidebarWeekly
-              weeklyGoals={weeklyGoals}
-              cadence={weeklyGoalsCadence}
-              onToggleWeeklyGoal={handleToggleWeeklyGoal}
-              onAddWeeklyGoal={handleAddWeeklyGoal}
-              onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
-              onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
-              onCadenceChange={handleCadenceChange}
-              thisWeekItems={thisWeekItems}
-              nextWeekItems={nextWeekItems}
-              onAddLookaheadItem={handleAddLookaheadItem}
-              onUpdateLookaheadItem={handleUpdateLookaheadItem}
-              onDeleteLookaheadItem={handleDeleteLookaheadItem}
-              learningsText={learningsText}
-              onUpdateLearnings={handleUpdateLearnings}
-            />
+        <div className="space-y-8">
+          {/* Weekly Goals + Daily Grid Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Sidebar (Desktop) */}
+            <div className="hidden lg:block lg:col-span-3">
+              <SidebarWeekly
+                weeklyGoals={weeklyGoals}
+                cadence={weeklyGoalsCadence}
+                onToggleWeeklyGoal={handleToggleWeeklyGoal}
+                onAddWeeklyGoal={handleAddWeeklyGoal}
+                onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
+                onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
+                onCadenceChange={handleCadenceChange}
+                thisWeekItems={thisWeekItems}
+                nextWeekItems={nextWeekItems}
+                onAddLookaheadItem={handleAddLookaheadItem}
+                onUpdateLookaheadItem={handleUpdateLookaheadItem}
+                onDeleteLookaheadItem={handleDeleteLookaheadItem}
+                learningsText={learningsText}
+                onUpdateLearnings={handleUpdateLearnings}
+              />
+            </div>
+
+            {/* Mobile Sidebar */}
+            <div className="lg:hidden col-span-1">
+              <MobileSidebar
+                weeklyGoals={weeklyGoals}
+                cadence={weeklyGoalsCadence}
+                onToggleWeeklyGoal={handleToggleWeeklyGoal}
+                onAddWeeklyGoal={handleAddWeeklyGoal}
+                onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
+                onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
+                onCadenceChange={handleCadenceChange}
+                thisWeekItems={thisWeekItems}
+                nextWeekItems={nextWeekItems}
+                onAddLookaheadItem={handleAddLookaheadItem}
+                onUpdateLookaheadItem={handleUpdateLookaheadItem}
+                onDeleteLookaheadItem={handleDeleteLookaheadItem}
+                learningsText={learningsText}
+                onUpdateLearnings={handleUpdateLearnings}
+              />
+            </div>
+
+            {/* Main Content - Daily Grid Only */}
+            <div className="lg:col-span-9">
+              <DailyGrid
+                weekDates={weekDates}
+                dailyGoals={dailyGoals}
+                onToggleGoal={handleToggleDailyGoal}
+                onAddGoal={handleAddDailyGoal}
+                onUpdateGoal={handleUpdateDailyGoal}
+                onDeleteGoal={handleDeleteDailyGoal}
+              />
+            </div>
           </div>
 
-          {/* Mobile Sidebar */}
-          <div className="lg:hidden col-span-1">
-            <MobileSidebar
-              weeklyGoals={weeklyGoals}
-              cadence={weeklyGoalsCadence}
-              onToggleWeeklyGoal={handleToggleWeeklyGoal}
-              onAddWeeklyGoal={handleAddWeeklyGoal}
-              onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
-              onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
-              onCadenceChange={handleCadenceChange}
-              thisWeekItems={thisWeekItems}
-              nextWeekItems={nextWeekItems}
-              onAddLookaheadItem={handleAddLookaheadItem}
-              onUpdateLookaheadItem={handleUpdateLookaheadItem}
-              onDeleteLookaheadItem={handleDeleteLookaheadItem}
-              learningsText={learningsText}
-              onUpdateLearnings={handleUpdateLearnings}
-            />
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-9 space-y-6">
-            {/* Daily Grid */}
-            <DailyGrid
-              weekDates={weekDates}
-              dailyGoals={dailyGoals}
-              onToggleGoal={handleToggleDailyGoal}
-              onAddGoal={handleAddDailyGoal}
-              onUpdateGoal={handleUpdateDailyGoal}
-              onDeleteGoal={handleDeleteDailyGoal}
-            />
+          {/* Tracking & Progress Section - Full Width */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-light text-foreground px-1">Tracking & Progress</h2>
 
             {/* Discipline */}
             <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
 
             {/* Heatmaps */}
-            <div className="grid grid-cols-1 gap-6">
-              <Card className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <Card className="p-4 md:p-6">
                 <GoalsHeatmap goals={allDailyGoals} />
               </Card>
-              <Card className="p-6">
+              <Card className="p-4 md:p-6">
                 <DisciplineHeatmap tracking={allDisciplineTracking} />
               </Card>
             </div>
