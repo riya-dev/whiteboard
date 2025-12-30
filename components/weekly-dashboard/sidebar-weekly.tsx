@@ -85,8 +85,17 @@ export function SidebarWeekly({
         {/* Weekly Goals Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-foreground">Weekly Goals</h3>
-            <ToggleGroup type="single" value={cadence} onValueChange={(val) => val && onCadenceChange(val as "weekly" | "biweekly")} className="gap-1">
+            <h3 className="text-base font-semibold text-foreground">
+              Weekly Goals
+            </h3>
+            <ToggleGroup
+              type="single"
+              value={cadence}
+              onValueChange={(val) =>
+                val && onCadenceChange(val as "weekly" | "biweekly")
+              }
+              className="gap-1"
+            >
               <ToggleGroupItem value="weekly" className="h-7 px-3 text-xs">
                 Weekly
               </ToggleGroupItem>
@@ -98,14 +107,23 @@ export function SidebarWeekly({
 
           {/* Biweekly end date display */}
           {biweeklyEndDate && (
-            <p className="text-xs text-muted-foreground mb-2">Goals end {biweeklyEndDate}</p>
+            <p className="text-xs text-muted-foreground mb-2">
+              Goals end {biweeklyEndDate}
+            </p>
           )}
 
           {/* Goals list */}
           <div className="space-y-2">
             {weeklyGoals.map((goal) => (
-              <div key={goal.id} className="group flex items-start gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors">
-                <Checkbox checked={goal.is_completed} onCheckedChange={() => onToggleWeeklyGoal(goal.id)} className="mt-0.5" />
+              <div
+                key={goal.id}
+                className="group flex items-start gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors"
+              >
+                <Checkbox
+                  checked={goal.is_completed}
+                  onCheckedChange={() => onToggleWeeklyGoal(goal.id)}
+                  className="mt-0.5"
+                />
                 {editingGoalId === goal.id ? (
                   <Input
                     type="text"
@@ -113,11 +131,11 @@ export function SidebarWeekly({
                     onChange={(e) => setEditGoalText(e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        e.preventDefault()
-                        saveEditGoal()
+                        e.preventDefault();
+                        saveEditGoal();
                       } else if (e.key === "Escape") {
-                        setEditingGoalId(null)
-                        setEditGoalText("")
+                        setEditingGoalId(null);
+                        setEditGoalText("");
                       }
                     }}
                     onBlur={saveEditGoal}
@@ -126,7 +144,11 @@ export function SidebarWeekly({
                   />
                 ) : (
                   <span
-                    className={`flex-1 text-sm cursor-pointer ${goal.is_completed ? "line-through text-muted-foreground" : ""}`}
+                    className={`flex-1 text-sm cursor-pointer ${
+                      goal.is_completed
+                        ? "line-through text-muted-foreground"
+                        : ""
+                    }`}
                     onClick={() => startEditGoal(goal.id, goal.goal_text)}
                   >
                     {goal.goal_text}
@@ -151,8 +173,8 @@ export function SidebarWeekly({
                 onChange={(e) => setNewGoalText(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    e.preventDefault()
-                    handleAddGoal()
+                    e.preventDefault();
+                    handleAddGoal();
                   }
                 }}
                 placeholder="Add goal..."
@@ -164,24 +186,30 @@ export function SidebarWeekly({
 
         {/* Look Ahead Section */}
         <div>
-          <h3 className="text-base font-semibold text-foreground mb-3">Look Ahead</h3>
+          <h3 className="text-base font-semibold text-foreground mb-3">
+            Look Ahead
+          </h3>
 
           <div className="space-y-4">
             {/* This week */}
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">This week:</label>
+              <label className="text-xs text-muted-foreground mb-1 block">
+                This week:
+              </label>
               <LookaheadList
                 items={thisWeekItems}
                 onAdd={(text) => onAddLookaheadItem("this_week", text)}
                 onUpdate={onUpdateLookaheadItem}
                 onDelete={onDeleteLookaheadItem}
-                placeholder="What are you focusing on this week?"
+                placeholder="What's coming up this week?"
               />
             </div>
 
             {/* Next week */}
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Next week:</label>
+              <label className="text-xs text-muted-foreground mb-1 block">
+                Next week:
+              </label>
               <LookaheadList
                 items={nextWeekItems}
                 onAdd={(text) => onAddLookaheadItem("next_week", text)}
@@ -192,8 +220,7 @@ export function SidebarWeekly({
             </div>
           </div>
         </div>
-
       </CardContent>
     </Card>
-  )
+  );
 }
