@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { getShortDayName } from "@/lib/date-utils"
 import { calculateWeeklyDisciplinePercentage } from "@/lib/completion-utils"
@@ -22,15 +22,12 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-light">Discipline</CardTitle>
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="text-sm text-muted-foreground">
             <span className="font-medium text-primary">{disciplinePercentage}%</span> this week
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
         <div className="space-y-1">
           {weekDates.map((date) => {
             const dateStr = date.toISOString().split("T")[0]

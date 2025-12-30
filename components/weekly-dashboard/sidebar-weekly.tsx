@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -81,14 +81,11 @@ export function SidebarWeekly({
 
   return (
     <Card className="weekly-sidebar">
-      <CardHeader>
-        <CardTitle className="text-xl font-light">Weekly</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 pt-6">
         {/* Weekly Goals Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Goals</h3>
+            <h3 className="text-base font-semibold text-foreground">Weekly Goals</h3>
             <ToggleGroup type="single" value={cadence} onValueChange={(val) => val && onCadenceChange(val as "weekly" | "biweekly")} className="gap-1">
               <ToggleGroupItem value="weekly" className="h-7 px-3 text-xs">
                 Weekly
@@ -165,9 +162,9 @@ export function SidebarWeekly({
           </div>
         </div>
 
-        {/* LOOK AHEAD Section */}
+        {/* Look Ahead Section */}
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground mb-3">Look Ahead</h3>
+          <h3 className="text-base font-semibold text-foreground mb-3">Look Ahead</h3>
 
           <div className="space-y-4">
             {/* This week */}

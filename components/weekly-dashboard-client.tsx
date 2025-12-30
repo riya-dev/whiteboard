@@ -457,10 +457,10 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         <DashboardHeader weekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} />
 
         {/* Main Layout */}
-        <div className="space-y-8">
-          {/* Whiteboard Section - Weekly Goals + Daily Grid */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-light text-foreground px-1">Whiteboard</h2>
+        <div className="space-y-10">
+          {/* ========== WHITEBOARD SECTION ========== */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-foreground">Whiteboard</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Sidebar (Desktop) */}
@@ -499,8 +499,9 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
                 />
               </div>
 
-              {/* Main Content - Daily Grid Only */}
-              <div className="lg:col-span-9">
+              {/* Main Content - Daily Grid */}
+              <div className="lg:col-span-9 space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">Daily Goals</h3>
                 <DailyGrid
                   weekDates={weekDates}
                   dailyGoals={dailyGoals}
@@ -511,21 +512,21 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
                 />
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Tracking & Progress Section - Full Width */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-light text-foreground px-1">Tracking & Progress</h2>
+          {/* ========== TRACKING & PROGRESS SECTION ========== */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-foreground">Tracking & Progress</h2>
 
             {/* Habits */}
-            <div>
-              <h3 className="text-lg font-light text-foreground px-1 mb-3">Habits</h3>
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-foreground">Habits</h3>
               <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
             </div>
 
-            {/* Completion Heatmaps */}
-            <div>
-              <h3 className="text-lg font-light text-foreground px-1 mb-3">Completion Heatmaps</h3>
+            {/* Heatmaps */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-foreground">Heatmaps</h3>
               <div className="grid grid-cols-1 gap-4">
                 <Card className="p-4 md:p-6">
                   <GoalsHeatmap goals={allDailyGoals} />
@@ -535,7 +536,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
                 </Card>
               </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
     </div>
