@@ -78,35 +78,30 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
 
   if (!event && !isEditing) {
     return (
-      <div className="h-14 w-auto">
-        <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
-          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsEditing(true)}
-              className="h-7 text-xs text-muted-foreground hover:text-foreground"
-            >
-              + Add countdown
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="w-auto">
+        <button
+          onClick={() => setIsEditing(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-all text-sm text-muted-foreground hover:text-primary"
+        >
+          <CalendarIcon className="h-4 w-4" />
+          <span>Add countdown</span>
+        </button>
       </div>
     )
   }
 
   if (isEditing) {
     return (
-      <div className="h-14 w-auto">
-        <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
-          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
-            <div className="flex items-center gap-2">
+      <div className="w-auto">
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap items-center gap-2">
               <Input
                 type="text"
                 value={eventName}
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="Event name..."
-                className="h-7 text-xs w-32"
+                className="h-9 text-sm w-40 flex-1 min-w-[160px]"
                 autoFocus
               />
               <Popover>
@@ -114,10 +109,10 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-7 w-[110px] text-xs justify-start"
+                    className="h-9 w-[130px] text-sm justify-start"
                   >
-                    <CalendarIcon className="mr-1 h-3 w-3" />
-                    {selectedDate ? format(selectedDate, "MMM d") : "Date"}
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "MMM d, yyyy") : "Pick date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -128,29 +123,31 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
                   />
                 </PopoverContent>
               </Popover>
-              <Button type="button" onClick={handleSave} size="sm" className="h-7 text-xs px-2">
-                Save
-              </Button>
-              <Button
-                type="button"
-                onClick={handleCancel}
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs px-2"
-              >
-                Cancel
-              </Button>
-              {event && (
+              <div className="flex items-center gap-2">
+                <Button type="button" onClick={handleSave} size="sm" className="h-9 text-sm px-4">
+                  Save
+                </Button>
                 <Button
                   type="button"
-                  onClick={handleDelete}
-                  variant="ghost"
+                  onClick={handleCancel}
+                  variant="outline"
                   size="sm"
-                  className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                  className="h-9 text-sm px-4"
                 >
-                  <X className="h-3 w-3" />
+                  Cancel
                 </Button>
-              )}
+                {event && (
+                  <Button
+                    type="button"
+                    onClick={handleDelete}
+                    variant="ghost"
+                    size="sm"
+                    className="h-9 w-9 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -165,30 +162,54 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
     const formattedDate = format(targetDate, "EEE, MMM d, yyyy").toUpperCase()
 
     return (
-      <div className="group h-14 w-auto">
-        <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
-          <CardContent className="px-3 md:px-4 py-0 h-full flex items-center whitespace-nowrap">
-            <div className="flex items-start gap-2">
-              <div>
-                <div className="text-lg font-semibold text-primary leading-tight">
-                  {weeks} {weeks === 1 ? "week" : "weeks"}{" "}
-                  {days} {days === 1 ? "day" : "days"}
-                </div>
-                <div className="text-sm text-muted-foreground leading-tight">
-                  until <span className="text-foreground">{event.event_name}, {formattedDate}</span>
-                </div>
-              </div>
-              <button
-                onClick={handleEdit}
-                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-accent rounded"
-                aria-label="Edit countdown"
-              >
-                <Pencil className="w-3 h-3 text-muted-foreground" />
-              </button>
+      <Card className="group h-full border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5">
+        <CardContent className="h-full px-4 py-0 flex items-center">
+          <div className="flex items-center gap-3 w-full">
+            {/* Event name and icon */}
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-primary/60" />
+              <span className="font-medium text-sm text-foreground whitespace-nowrap">
+                {event.event_name}
+              </span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            {/* Countdown - compact horizontal layout */}
+            <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-1">
+                <span className="text-xl font-bold text-primary tabular-nums">
+                  {weeks}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {weeks === 1 ? "wk" : "wks"}
+                </span>
+              </div>
+              <span className="text-muted-foreground/40">:</span>
+              <div className="flex items-baseline gap-1">
+                <span className="text-xl font-bold text-primary tabular-nums">
+                  {days}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {days === 1 ? "day" : "days"}
+                </span>
+              </div>
+            </div>
+
+            {/* Date */}
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formattedDate}
+            </span>
+
+            {/* Edit button */}
+            <button
+              onClick={handleEdit}
+              className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-primary/10 rounded"
+              aria-label="Edit countdown"
+            >
+              <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
+            </button>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
