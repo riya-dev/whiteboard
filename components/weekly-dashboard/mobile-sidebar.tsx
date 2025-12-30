@@ -24,8 +24,6 @@ interface MobileSidebarProps {
   onAddLookaheadItem: (section: "this_week" | "next_week", text: string) => void
   onUpdateLookaheadItem: (id: string, text: string) => void
   onDeleteLookaheadItem: (id: string) => void
-  learningsText: string
-  onUpdateLearnings: (text: string) => void
 }
 
 export function MobileSidebar(props: MobileSidebarProps) {

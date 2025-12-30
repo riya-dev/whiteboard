@@ -39,25 +39,10 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
         </div>
       </div>
 
-      <div className="relative">
-        {/* Month labels */}
-        <div className="flex gap-[3px] mb-1 ml-6">
-          {monthLabels.map(({ month, weekIndex }) => (
-            <div
-              key={`${month}-${weekIndex}`}
-              className="text-xs text-muted-foreground"
-              style={{
-                marginLeft: weekIndex === 0 ? "0" : `${weekIndex * 14}px`,
-              }}
-            >
-              {month}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          {/* Day of week labels */}
-          <div className="flex flex-col gap-[3px] justify-start pt-1">
+      <div className="flex gap-2">
+        {/* Day of week labels */}
+        <div className="flex flex-col justify-start pt-5">
+          <div className="flex flex-col gap-[3px]">
             {dayLabels.map((label, index) => (
               <div
                 key={index}
@@ -67,9 +52,27 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Scrollable container for month labels and heatmap */}
+        <div className="flex-1 overflow-x-auto">
+          {/* Month labels */}
+          <div className="relative mb-1 h-4">
+            {monthLabels.map(({ month, weekIndex }) => (
+              <div
+                key={`${month}-${weekIndex}`}
+                className="absolute text-xs text-muted-foreground"
+                style={{
+                  left: `${weekIndex * 14}px`,
+                }}
+              >
+                {month}
+              </div>
+            ))}
+          </div>
 
           {/* Heatmap grid */}
-          <div className="heatmap-grid flex-1">
+          <div className="heatmap-grid">
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} className="heatmap-week">
                 {/* Pad beginning of first week if it doesn't start on Sunday */}

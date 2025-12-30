@@ -2,12 +2,10 @@
 
 import { useState } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { ChevronDown, X } from "lucide-react"
+import { X } from "lucide-react"
 import { LookaheadList, type LookaheadItem } from "./lookahead-list"
 import { getBiweeklyEndMonday, formatBiweeklyEndDate } from "@/lib/date-utils"
 
@@ -35,10 +33,6 @@ interface SidebarWeeklyProps {
   onAddLookaheadItem: (section: "this_week" | "next_week", text: string) => void
   onUpdateLookaheadItem: (id: string, text: string) => void
   onDeleteLookaheadItem: (id: string) => void
-
-  // Learnings
-  learningsText: string
-  onUpdateLearnings: (text: string) => void
 }
 
 export function SidebarWeekly({
@@ -54,10 +48,7 @@ export function SidebarWeekly({
   onAddLookaheadItem,
   onUpdateLookaheadItem,
   onDeleteLookaheadItem,
-  learningsText,
-  onUpdateLearnings,
 }: SidebarWeeklyProps) {
-  const [learningsOpen, setLearningsOpen] = useState(false)
   const [newGoalText, setNewGoalText] = useState("")
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
   const [editGoalText, setEditGoalText] = useState("")
@@ -205,30 +196,6 @@ export function SidebarWeekly({
           </div>
         </div>
 
-        {/* Learnings Section - Collapsible */}
-        <Collapsible open={learningsOpen} onOpenChange={setLearningsOpen}>
-          <CollapsibleTrigger className="flex items-center justify-between w-full group">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Learnings</h3>
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${learningsOpen ? "rotate-180" : ""}`} />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3">
-            <Textarea
-              value={learningsText}
-              onChange={(e) => onUpdateLearnings(e.target.value)}
-              placeholder="What did you learn this week?"
-              className="min-h-[100px] resize-none bg-background"
-              rows={4}
-            />
-          </CollapsibleContent>
-        </Collapsible>
-
-        {/* To-do Section - Optional checkbox */}
-        <div>
-          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-            <input type="checkbox" className="rounded border-border" />
-            <span>To-do</span>
-          </label>
-        </div>
       </CardContent>
     </Card>
   )

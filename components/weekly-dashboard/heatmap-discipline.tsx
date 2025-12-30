@@ -13,5 +13,5 @@ export function DisciplineHeatmap({ tracking }: DisciplineHeatmapProps) {
   const dates = getLast365Days()
   const heatmapData = buildDisciplineHeatmapData(dates, tracking)
 
-  return <Heatmap title="Discipline Completion" data={heatmapData} colorScale="discipline" />
+  return <Heatmap title="Discipline" data={heatmapData} colorScale="discipline" />
 }

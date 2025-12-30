@@ -60,7 +60,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
   const [weeklyGoalsCadence, setWeeklyGoalsCadence] = useState<"weekly" | "biweekly">("weekly")
   const [thisWeekItems, setThisWeekItems] = useState<LookaheadItem[]>([])
   const [nextWeekItems, setNextWeekItems] = useState<LookaheadItem[]>([])
-  const [learningsText, setLearningsText] = useState<string>("")
   const [disciplineTracking, setDisciplineTracking] = useState<DisciplineTracking[]>([])
 
   // Heatmap data (365 days)
@@ -136,15 +135,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
     setThisWeekItems(thisWeek)
     setNextWeekItems(nextWeek)
-
-    // Load learnings for this week
-    const { data: learningsData } = await supabase
-      .from("lookahead")
-      .select("learnings_text")
-      .eq("week_start_date", weekStartStr)
-      .maybeSingle()
-
-    setLearningsText(learningsData?.learnings_text || "")
 
     // Load discipline tracking for this week
     const { data: disciplineData } = await supabase
@@ -407,30 +397,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     }
   }
 
-  // ===== LEARNINGS HANDLER =====
-
-  async function handleUpdateLearnings(text: string) {
-    const weekStartStr = formatDate(currentWeekStart)
-    setLearningsText(text)
-
-    // Upsert to database
-    const { data: existing } = await supabase
-      .from("lookahead")
-      .select("id")
-      .eq("week_start_date", weekStartStr)
-      .maybeSingle()
-
-    if (existing) {
-      await supabase.from("lookahead").update({ learnings_text: text }).eq("id", existing.id)
-    } else {
-      await supabase.from("lookahead").insert({
-        user_id: user.id,
-        week_start_date: weekStartStr,
-        learnings_text: text,
-      })
-    }
-  }
-
   // ===== DISCIPLINE HANDLERS =====
 
   async function handleToggleDiscipline(
@@ -492,76 +458,82 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
 
         {/* Main Layout */}
         <div className="space-y-8">
-          {/* Weekly Goals + Daily Grid Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Sidebar (Desktop) */}
-            <div className="hidden lg:block lg:col-span-3">
-              <SidebarWeekly
-                weeklyGoals={weeklyGoals}
-                cadence={weeklyGoalsCadence}
-                onToggleWeeklyGoal={handleToggleWeeklyGoal}
-                onAddWeeklyGoal={handleAddWeeklyGoal}
-                onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
-                onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
-                onCadenceChange={handleCadenceChange}
-                thisWeekItems={thisWeekItems}
-                nextWeekItems={nextWeekItems}
-                onAddLookaheadItem={handleAddLookaheadItem}
-                onUpdateLookaheadItem={handleUpdateLookaheadItem}
-                onDeleteLookaheadItem={handleDeleteLookaheadItem}
-                learningsText={learningsText}
-                onUpdateLearnings={handleUpdateLearnings}
-              />
-            </div>
+          {/* Whiteboard Section - Weekly Goals + Daily Grid */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-light text-foreground px-1">Whiteboard</h2>
 
-            {/* Mobile Sidebar */}
-            <div className="lg:hidden col-span-1">
-              <MobileSidebar
-                weeklyGoals={weeklyGoals}
-                cadence={weeklyGoalsCadence}
-                onToggleWeeklyGoal={handleToggleWeeklyGoal}
-                onAddWeeklyGoal={handleAddWeeklyGoal}
-                onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
-                onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
-                onCadenceChange={handleCadenceChange}
-                thisWeekItems={thisWeekItems}
-                nextWeekItems={nextWeekItems}
-                onAddLookaheadItem={handleAddLookaheadItem}
-                onUpdateLookaheadItem={handleUpdateLookaheadItem}
-                onDeleteLookaheadItem={handleDeleteLookaheadItem}
-                learningsText={learningsText}
-                onUpdateLearnings={handleUpdateLearnings}
-              />
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              {/* Left Sidebar (Desktop) */}
+              <div className="hidden lg:block lg:col-span-3">
+                <SidebarWeekly
+                  weeklyGoals={weeklyGoals}
+                  cadence={weeklyGoalsCadence}
+                  onToggleWeeklyGoal={handleToggleWeeklyGoal}
+                  onAddWeeklyGoal={handleAddWeeklyGoal}
+                  onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
+                  onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
+                  onCadenceChange={handleCadenceChange}
+                  thisWeekItems={thisWeekItems}
+                  nextWeekItems={nextWeekItems}
+                  onAddLookaheadItem={handleAddLookaheadItem}
+                  onUpdateLookaheadItem={handleUpdateLookaheadItem}
+                  onDeleteLookaheadItem={handleDeleteLookaheadItem}
+                />
+              </div>
 
-            {/* Main Content - Daily Grid Only */}
-            <div className="lg:col-span-9">
-              <DailyGrid
-                weekDates={weekDates}
-                dailyGoals={dailyGoals}
-                onToggleGoal={handleToggleDailyGoal}
-                onAddGoal={handleAddDailyGoal}
-                onUpdateGoal={handleUpdateDailyGoal}
-                onDeleteGoal={handleDeleteDailyGoal}
-              />
+              {/* Mobile Sidebar */}
+              <div className="lg:hidden col-span-1">
+                <MobileSidebar
+                  weeklyGoals={weeklyGoals}
+                  cadence={weeklyGoalsCadence}
+                  onToggleWeeklyGoal={handleToggleWeeklyGoal}
+                  onAddWeeklyGoal={handleAddWeeklyGoal}
+                  onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
+                  onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
+                  onCadenceChange={handleCadenceChange}
+                  thisWeekItems={thisWeekItems}
+                  nextWeekItems={nextWeekItems}
+                  onAddLookaheadItem={handleAddLookaheadItem}
+                  onUpdateLookaheadItem={handleUpdateLookaheadItem}
+                  onDeleteLookaheadItem={handleDeleteLookaheadItem}
+                />
+              </div>
+
+              {/* Main Content - Daily Grid Only */}
+              <div className="lg:col-span-9">
+                <DailyGrid
+                  weekDates={weekDates}
+                  dailyGoals={dailyGoals}
+                  onToggleGoal={handleToggleDailyGoal}
+                  onAddGoal={handleAddDailyGoal}
+                  onUpdateGoal={handleUpdateDailyGoal}
+                  onDeleteGoal={handleDeleteDailyGoal}
+                />
+              </div>
             </div>
           </div>
 
           {/* Tracking & Progress Section - Full Width */}
           <div className="space-y-4">
-            <h2 className="text-lg font-light text-foreground px-1">Tracking & Progress</h2>
+            <h2 className="text-2xl font-light text-foreground px-1">Tracking & Progress</h2>
 
-            {/* Discipline */}
-            <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
+            {/* Habits */}
+            <div>
+              <h3 className="text-lg font-light text-foreground px-1 mb-3">Habits</h3>
+              <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
+            </div>
 
-            {/* Heatmaps */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <Card className="p-4 md:p-6">
-                <GoalsHeatmap goals={allDailyGoals} />
-              </Card>
-              <Card className="p-4 md:p-6">
-                <DisciplineHeatmap tracking={allDisciplineTracking} />
-              </Card>
+            {/* Completion Heatmaps */}
+            <div>
+              <h3 className="text-lg font-light text-foreground px-1 mb-3">Completion Heatmaps</h3>
+              <div className="grid grid-cols-1 gap-4">
+                <Card className="p-4 md:p-6">
+                  <GoalsHeatmap goals={allDailyGoals} />
+                </Card>
+                <Card className="p-4 md:p-6">
+                  <DisciplineHeatmap tracking={allDisciplineTracking} />
+                </Card>
+              </div>
             </div>
           </div>
         </div>

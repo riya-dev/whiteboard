@@ -13,5 +13,5 @@ export function GoalsHeatmap({ goals }: GoalsHeatmapProps) {
   const dates = getLast365Days()
   const heatmapData = buildGoalsHeatmapData(dates, goals)
 
-  return <Heatmap title="Goals Completion" data={heatmapData} colorScale="goals" />
+  return <Heatmap title="Goals" data={heatmapData} colorScale="goals" />
 }

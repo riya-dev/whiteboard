@@ -167,7 +167,6 @@
   display: flex;
   gap: 3px;
   flex-wrap: nowrap;
-  overflow-x: auto;
   padding: 0.5rem 0;
 }
 
