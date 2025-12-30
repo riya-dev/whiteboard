@@ -67,9 +67,9 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
             endDate={endDate}
             panelColors={panelColors}
             weekLabels={["", "M", "", "W", "", "F", ""]}
-            rectSize={11}
-            space={3}
-            width={800}
+            rectSize={14}
+            space={4}
+            width={1100}
             rectProps={{
               rx: 2,
             }}

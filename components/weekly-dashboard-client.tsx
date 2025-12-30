@@ -514,27 +514,22 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
             </div>
           </section>
 
-          {/* ========== TRACKING & PROGRESS SECTION ========== */}
+          {/* ========== HABITS SECTION ========== */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold text-foreground">Tracking & Progress</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Habits</h2>
+            <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
+          </section>
 
-            {/* Habits */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-foreground">Habits</h3>
-              <DisciplineCard weekDates={weekDates} tracking={disciplineTracking} onToggle={handleToggleDiscipline} />
-            </div>
-
-            {/* Heatmaps */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-foreground">Heatmaps</h3>
-              <div className="grid grid-cols-1 gap-4">
-                <Card className="p-4 md:p-6">
-                  <GoalsHeatmap goals={allDailyGoals} />
-                </Card>
-                <Card className="p-4 md:p-6">
-                  <DisciplineHeatmap tracking={allDisciplineTracking} />
-                </Card>
-              </div>
+          {/* ========== HEATMAPS SECTION ========== */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-foreground">Heatmaps</h2>
+            <div className="grid grid-cols-1 gap-4">
+              <Card className="p-4 md:p-6">
+                <GoalsHeatmap goals={allDailyGoals} />
+              </Card>
+              <Card className="p-4 md:p-6">
+                <DisciplineHeatmap tracking={allDisciplineTracking} />
+              </Card>
             </div>
           </section>
         </div>
