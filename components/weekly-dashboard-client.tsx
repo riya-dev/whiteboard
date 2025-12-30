@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
 import { getTuesdayWeekStart, getTuesdayWeekDates, formatDate, getLast365Days, isInBiweeklyPeriod } from "@/lib/date-utils"
+import { format } from "date-fns"
 import type { DailyGoalData, DisciplineTrackingData } from "@/lib/completion-utils"
 
 // Components
@@ -15,6 +16,7 @@ import { DisciplineCard } from "./weekly-dashboard/discipline-card"
 import { GoalsHeatmap } from "./weekly-dashboard/heatmap-goals"
 import { DisciplineHeatmap } from "./weekly-dashboard/heatmap-discipline"
 import { CountdownTimer } from "./weekly-dashboard/countdown-timer"
+import { WeekPicker } from "./weekly-dashboard/week-picker"
 import { BowDecorations } from "./bow-decorations"
 import { Card } from "./ui/card"
 import type { LookaheadItem } from "./weekly-dashboard/lookahead-list"
@@ -530,8 +532,17 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
           <section className="space-y-6">
             <h2 className="text-2xl font-semibold text-foreground">Whiteboard</h2>
 
-            {/* Countdown Timer */}
-            <div className="flex justify-end">
+            {/* Top Info Bar */}
+            <div className="flex items-center justify-between gap-4">
+              {/* Left: Empty Square Box */}
+              <div className="w-10 h-10 rounded border-2 border-dashed border-border bg-muted/20"></div>
+
+              {/* Center: Week Date */}
+              <div className="flex-1 flex justify-center">
+                <span className="text-foreground">Week of {format(currentWeekStart, "MMMM d, yyyy")}</span>
+              </div>
+
+              {/* Right: Countdown Timer */}
               <CountdownTimer
                 event={countdownEvent}
                 onSaveEvent={handleSaveCountdownEvent}
