@@ -106,52 +106,81 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
   }, [dateStr])
 
   return (
-      <Card
-        className={`relative p-5 transition-all duration-300 border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border`}
-      >
-        {/* Top-right quick flags */}
-        <div className="absolute top-2 right-2 flex items-center gap-1.5">
-          {/* Booster button (circle) */}
-          <button
-            type="button"
-            onClick={() => saveFlags({ booster: !booster })}
-            title="Mark booster"
-            className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors ${
-              booster ? "border-primary bg-primary/15" : "border-border bg-background/60 hover:bg-accent/30"
-            }`}
-            aria-pressed={booster}
+    <Card
+      className={`relative p-5 transition-all duration-300 border-border/50 bg-gradient-to-br from-card to-muted/5 hover:shadow-md hover:border-border`}
+    >
+      {/* Top-right quick flags */}
+      <div className="absolute top-2 right-2 flex items-center gap-1.5">
+        {/* Booster button (circle) */}
+        <button
+          type="button"
+          onClick={() => saveFlags({ booster: !booster })}
+          className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors ${
+            booster
+              ? "border-primary bg-primary/15"
+              : "border-border bg-background/60 hover:bg-accent/30"
+          }`}
+          aria-pressed={booster}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className={booster ? "text-primary" : "text-muted-foreground"}
           >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className={booster ? "text-primary" : "text-muted-foreground"}>
-              <circle cx="12" cy="12" r="6" />
-            </svg>
-          </button>
-          {/* XR button (pill) */}
-          <button
-            type="button"
-            onClick={() => saveFlags({ xr: !xr })}
-            title="Mark XR"
-            className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors ${
-              xr ? "border-primary bg-primary/15" : "border-border bg-background/60 hover:bg-accent/30"
-            }`}
-            aria-pressed={xr}
+            <circle cx="12" cy="12" r="6" />
+          </svg>
+        </button>
+        {/* XR button (pill) */}
+        <button
+          type="button"
+          onClick={() => saveFlags({ xr: !xr })}
+          className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors ${
+            xr
+              ? "border-primary bg-primary/15"
+              : "border-border bg-background/60 hover:bg-accent/30"
+          }`}
+          aria-pressed={xr}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            className={xr ? "text-primary" : "text-muted-foreground"}
           >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className={xr ? "text-primary" : "text-muted-foreground"}>
-              <rect x="5" y="9" width="14" height="6" rx="3" />
-            </svg>
-          </button>
-        </div>
+            <rect x="5" y="9" width="14" height="6" rx="3" />
+          </svg>
+        </button>
+      </div>
       {/* Day Header */}
       <div className="mb-5 text-center">
         <div className="flex items-center justify-center gap-1.5 mb-2">
-          <Calendar className={`h-3.5 w-3.5 ${today ? "text-primary" : "text-muted-foreground"}`} />
-          <div className={`text-xs uppercase tracking-wider font-medium ${today ? "text-primary" : "text-muted-foreground"}`}>
+          <Calendar
+            className={`h-3.5 w-3.5 ${
+              today ? "text-primary" : "text-muted-foreground"
+            }`}
+          />
+          <div
+            className={`text-xs uppercase tracking-wider font-medium ${
+              today ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
             {dayName}
           </div>
         </div>
-        <div className={`text-3xl font-light tracking-tight ${today ? "text-primary font-medium" : "text-foreground"}`}>
+        <div
+          className={`text-3xl font-light tracking-tight ${
+            today ? "text-primary font-medium" : "text-foreground"
+          }`}
+        >
           {today ? (
             <span className="relative inline-flex items-center justify-center">
-              <span className="absolute inset-0 rounded-full bg-primary/10 blur-sm opacity-40" aria-hidden />
+              <span
+                className="absolute inset-0 rounded-full bg-primary/10 blur-sm opacity-40"
+                aria-hidden
+              />
               <span className="relative z-10">{dayNum}</span>
             </span>
           ) : (
@@ -163,8 +192,15 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
       {/* Goals List */}
       <div className="space-y-2.5">
         {goals.map((goal) => (
-          <div key={goal.id} className="flex items-start gap-2.5 group p-1.5 rounded-md hover:bg-accent/30 transition-colors">
-            <Checkbox checked={goal.is_completed} onCheckedChange={() => onToggleGoal(goal)} className="mt-0.5" />
+          <div
+            key={goal.id}
+            className="flex items-start gap-2.5 group p-1.5 rounded-md hover:bg-accent/30 transition-colors"
+          >
+            <Checkbox
+              checked={goal.is_completed}
+              onCheckedChange={() => onToggleGoal(goal)}
+              className="mt-0.5"
+            />
             {editingGoalId === goal.id ? (
               <Input
                 type="text"
@@ -179,7 +215,9 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
               <div className="flex-1 min-w-0">
                 <p
                   className={`text-sm leading-relaxed break-words cursor-pointer transition-colors ${
-                    goal.is_completed ? "line-through text-muted-foreground/70" : "text-foreground"
+                    goal.is_completed
+                      ? "line-through text-muted-foreground/70"
+                      : "text-foreground"
                   }`}
                   onClick={() => startEdit(goal.id, goal.goal_text)}
                 >
@@ -207,6 +245,6 @@ export function DayCard({ date, dateStr, goals, onToggleGoal, onAddGoal, onUpdat
           className="inline-add-input text-sm mt-1"
         />
       </div>
-      </Card>
-  )
+    </Card>
+  );
 }

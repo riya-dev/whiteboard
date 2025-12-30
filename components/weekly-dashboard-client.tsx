@@ -209,8 +209,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         if (allDone) triggerConfetti("rgb(244 63 94)");
         return next;
       });
-      // Refresh heatmap data
-      loadData()
     }
   }
 
@@ -264,8 +262,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         ...prev,
         [goal.goal_date]: prev[goal.goal_date].filter((g) => g.id !== goal.id),
       }))
-      // Refresh heatmap data
-      loadData()
     }
   }
 
@@ -482,9 +478,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
         });
       }
     }
-
-    // Refresh heatmap data
-    loadData()
   }
 
   // ===== COUNTDOWN EVENT HANDLERS =====

@@ -80,6 +80,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
         <Card className="h-full bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 flex items-center">
           <CardContent className="px-3 md:px-4 py-0 h-full flex items-center">
             <Button
+              type="button"
               variant="ghost"
               onClick={() => setIsEditing(true)}
               className="h-7 text-xs text-muted-foreground hover:text-foreground"
@@ -109,6 +110,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
                     className="h-7 w-[110px] text-xs justify-start"
                   >
@@ -124,10 +126,11 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
                   />
                 </PopoverContent>
               </Popover>
-              <Button onClick={handleSave} size="sm" className="h-7 text-xs px-2">
+              <Button type="button" onClick={handleSave} size="sm" className="h-7 text-xs px-2">
                 Save
               </Button>
               <Button
+                type="button"
                 onClick={handleCancel}
                 variant="ghost"
                 size="sm"
@@ -137,6 +140,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
               </Button>
               {event && (
                 <Button
+                  type="button"
                   onClick={handleDelete}
                   variant="ghost"
                   size="sm"

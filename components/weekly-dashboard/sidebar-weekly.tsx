@@ -85,9 +85,7 @@ export function SidebarWeekly({
         {/* Goals Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-semibold text-foreground">
-              Goals
-            </h3>
+            <h3 className="text-base font-semibold text-foreground">Goals</h3>
             <ToggleGroup
               type="single"
               value={cadence}
@@ -201,7 +199,7 @@ export function SidebarWeekly({
                 onAdd={(text) => onAddLookaheadItem("this_week", text)}
                 onUpdate={onUpdateLookaheadItem}
                 onDelete={onDeleteLookaheadItem}
-                placeholder="What's coming up this week?"
+                placeholder="Add event..."
               />
             </div>
 
@@ -215,7 +213,7 @@ export function SidebarWeekly({
                 onAdd={(text) => onAddLookaheadItem("next_week", text)}
                 onUpdate={onUpdateLookaheadItem}
                 onDelete={onDeleteLookaheadItem}
-                placeholder="What's coming up next week?"
+                placeholder="Add event..."
               />
             </div>
           </div>

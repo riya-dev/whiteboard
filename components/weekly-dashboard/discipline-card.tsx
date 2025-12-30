@@ -41,33 +41,39 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
 
                 <div className="flex items-center gap-3 flex-1">
                   {/* AM Check-in */}
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Checkbox
                       checked={dayTracking?.am_checkin || false}
                       onCheckedChange={() => onToggle(dateStr, "am_checkin")}
                     />
-                    <span>AM Check-in</span>
-                  </label>
+                    <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "am_checkin")}>
+                      AM Check-in
+                    </span>
+                  </div>
 
                   {/* PM Check-in */}
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Checkbox
                       checked={dayTracking?.pm_checkin || false}
                       onCheckedChange={() => onToggle(dateStr, "pm_checkin")}
                     />
-                    <span>PM Check-in</span>
-                  </label>
+                    <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "pm_checkin")}>
+                      PM Check-in
+                    </span>
+                  </div>
 
                   {/* Set goals for tomorrow */}
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Checkbox
                       checked={dayTracking?.set_goals_tomorrow || false}
                       onCheckedChange={() =>
                         onToggle(dateStr, "set_goals_tomorrow")
                       }
                     />
-                    <span>Set Goals for Tomorrow</span>
-                  </label>
+                    <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "set_goals_tomorrow")}>
+                      Set Goals for Tomorrow
+                    </span>
+                  </div>
                 </div>
               </div>
             );
