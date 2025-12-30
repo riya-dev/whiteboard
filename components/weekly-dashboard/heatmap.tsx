@@ -73,7 +73,7 @@ export function Heatmap({ title, data, colorScale }: HeatmapProps) {
             rectProps={{
               rx: 2,
             }}
-            legendRender={() => <g></g>}
+            legendRender={() => null as any}
             rectRender={(props, data) => {
               const intensity = (data as any).count || 0
               return (
