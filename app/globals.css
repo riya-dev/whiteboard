@@ -166,7 +166,7 @@
 /* Daily Grid Layout - 2-2-3 pattern */
 .daily-grid {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
   grid-template-columns: repeat(2, 1fr);
 }
 
@@ -232,22 +232,23 @@
 .discipline-day-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease;
 }
 
-.discipline-day-row:last-child {
-  border-bottom: none;
+.discipline-day-row:hover {
+  background-color: hsl(var(--accent) / 0.3);
 }
 
 .discipline-day-label {
-  min-width: 3rem;
+  min-width: 3.5rem;
   font-size: 0.75rem;
   text-transform: uppercase;
   color: var(--muted-foreground);
-  letter-spacing: 0.025em;
-  font-weight: 500;
+  letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
 /* Inline Add Input Styling */

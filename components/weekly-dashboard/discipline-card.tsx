@@ -21,14 +21,15 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
   }
 
   return (
-    <Card>
+    <Card className="bg-gradient-to-br from-card to-muted/5 border-border/50">
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-sm text-muted-foreground">
-            <span className="font-medium text-primary">{disciplinePercentage}%</span> this week
+        <div className="flex items-center justify-between mb-5">
+          <div className="text-sm font-medium">
+            <span className="text-lg font-semibold text-primary">{disciplinePercentage}%</span>
+            <span className="text-muted-foreground ml-2">this week</span>
           </div>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-2">
           {weekDates.map((date) => {
             const dateStr = date.toISOString().split("T")[0]
             const dayTracking = getDayTracking(dateStr)

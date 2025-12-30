@@ -80,7 +80,7 @@ export function SidebarWeekly({
       : null
 
   return (
-    <Card className="weekly-sidebar">
+    <Card className="weekly-sidebar bg-gradient-to-br from-card to-muted/5 border-border/50">
       <CardContent className="space-y-6 pt-6">
         {/* Goals Section */}
         <div>
