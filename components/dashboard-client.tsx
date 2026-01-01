@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { LogOut, Plus, X } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { LoadingWhiteboard } from "./loading-whiteboard"
 
 interface DailyGoal {
   id: string
@@ -244,11 +245,7 @@ export default function DashboardClient({ user }: { user: User }) {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Loading your planner...</div>
-      </div>
-    )
+    return <LoadingWhiteboard />
   }
 
   const weekDates = getWeekDates()

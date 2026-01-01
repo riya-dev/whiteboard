@@ -23,6 +23,7 @@ import { BowDecorations } from "./bow-decorations"
 import { Card, CardContent } from "./ui/card"
 import { triggerConfetti } from "@/lib/confetti";
 import type { LookaheadItem } from "./weekly-dashboard/lookahead-list"
+import { LoadingWhiteboard } from "./loading-whiteboard"
 
 // ===== TYPE DEFINITIONS =====
 
@@ -589,11 +590,7 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
   // ===== RENDER =====
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Loading your planner...</div>
-      </div>
-    )
+    return <LoadingWhiteboard />
   }
 
   const weekDates = getTuesdayWeekDates(currentWeekStart)
