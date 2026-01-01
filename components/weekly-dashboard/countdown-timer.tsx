@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { CalendarIcon, Pencil, X } from "lucide-react"
 import { format } from "date-fns"
+import { useClickSound } from "@/lib/use-click-sound"
 
 interface CountdownEvent {
   id: string
@@ -39,8 +40,10 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
   const [isEditing, setIsEditing] = useState(false)
   const [eventName, setEventName] = useState("")
   const [selectedDate, setSelectedDate] = useState<Date | undefined>()
+  const playClick = useClickSound()
 
   const handleEdit = () => {
+    playClick()
     if (event) {
       setEventName(event.event_name)
       // Parse as local time to avoid timezone issues
@@ -50,6 +53,7 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
   }
 
   const handleSave = () => {
+    playClick()
     if (eventName.trim() && selectedDate) {
       const targetDate = format(selectedDate, "yyyy-MM-dd")
       if (event) {
@@ -64,12 +68,14 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
   }
 
   const handleCancel = () => {
+    playClick()
     setEventName("")
     setSelectedDate(undefined)
     setIsEditing(false)
   }
 
   const handleDelete = () => {
+    playClick()
     if (event) {
       onDeleteEvent(event.id)
       setIsEditing(false)
@@ -80,7 +86,10 @@ export function CountdownTimer({ event, onSaveEvent, onUpdateEvent, onDeleteEven
     return (
       <div className="w-auto">
         <button
-          onClick={() => setIsEditing(true)}
+          onClick={() => {
+            playClick()
+            setIsEditing(true)
+          }}
           className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 transition-all text-sm text-muted-foreground hover:text-primary cursor-pointer"
         >
           <CalendarIcon className="h-4 w-4" />

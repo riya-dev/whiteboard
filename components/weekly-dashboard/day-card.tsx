@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Calendar, X } from "lucide-react"
 import { getDayName, getDayNumber, isToday } from "@/lib/date-utils"
+import { useClickSound } from "@/lib/use-click-sound"
 
 interface DailyGoal {
   id: string
@@ -34,6 +35,7 @@ export function DayCard({ date, dateStr, goals, booster, xr, onToggleGoal, onAdd
   const [newGoalText, setNewGoalText] = useState("")
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
   const [editGoalText, setEditGoalText] = useState("")
+  const playClick = useClickSound()
   const today = isToday(date)
   const dayName = getDayName(date)
   const dayNum = getDayNumber(date)
@@ -85,7 +87,10 @@ export function DayCard({ date, dateStr, goals, booster, xr, onToggleGoal, onAdd
         {/* Booster button (circle) */}
         <button
           type="button"
-          onClick={onToggleBooster}
+          onClick={() => {
+            playClick()
+            onToggleBooster()
+          }}
           className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors cursor-pointer ${
             booster
               ? "border-primary bg-primary/15"
@@ -107,7 +112,10 @@ export function DayCard({ date, dateStr, goals, booster, xr, onToggleGoal, onAdd
         {/* XR button (pill shape) */}
         <button
           type="button"
-          onClick={onToggleXr}
+          onClick={() => {
+            playClick()
+            onToggleXr()
+          }}
           className={`h-7 w-7 inline-flex items-center justify-center rounded-md border transition-colors cursor-pointer ${
             xr
               ? "border-primary bg-primary/15"
@@ -171,7 +179,10 @@ export function DayCard({ date, dateStr, goals, booster, xr, onToggleGoal, onAdd
           >
             <Checkbox
               checked={goal.is_completed}
-              onCheckedChange={() => onToggleGoal(goal)}
+              onCheckedChange={() => {
+                playClick()
+                onToggleGoal(goal)
+              }}
               className="mt-0.5 cursor-pointer"
             />
             {editingGoalId === goal.id ? (
@@ -199,7 +210,10 @@ export function DayCard({ date, dateStr, goals, booster, xr, onToggleGoal, onAdd
               </div>
             )}
             <button
-              onClick={() => onDeleteGoal(goal)}
+              onClick={() => {
+                playClick()
+                onDeleteGoal(goal)
+              }}
               className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-0.5 rounded hover:bg-destructive/10"
               aria-label="Delete goal"
             >

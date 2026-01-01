@@ -8,6 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { X } from "lucide-react"
 import { LookaheadList, type LookaheadItem } from "./lookahead-list"
 import { getBiweeklyEndMonday, formatBiweeklyEndDate } from "@/lib/date-utils"
+import { useClickSound } from "@/lib/use-click-sound"
 
 interface WeeklyGoal {
   id: string
@@ -52,6 +53,7 @@ export function SidebarWeekly({
   const [newGoalText, setNewGoalText] = useState("")
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null)
   const [editGoalText, setEditGoalText] = useState("")
+  const playClick = useClickSound()
 
   const handleAddGoal = () => {
     if (newGoalText.trim()) {
@@ -119,7 +121,10 @@ export function SidebarWeekly({
               >
                 <Checkbox
                   checked={goal.is_completed}
-                  onCheckedChange={() => onToggleWeeklyGoal(goal.id)}
+                  onCheckedChange={() => {
+                    playClick()
+                    onToggleWeeklyGoal(goal.id)
+                  }}
                   className="mt-0.5 cursor-pointer"
                 />
                 {editingGoalId === goal.id ? (
@@ -153,7 +158,10 @@ export function SidebarWeekly({
                   </span>
                 )}
                 <button
-                  onClick={() => onDeleteWeeklyGoal(goal.id)}
+                  onClick={() => {
+                    playClick()
+                    onDeleteWeeklyGoal(goal.id)
+                  }}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded cursor-pointer"
                   aria-label="Delete goal"
                 >

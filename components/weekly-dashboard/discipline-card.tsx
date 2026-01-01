@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { getShortDayName } from "@/lib/date-utils"
 import type { DisciplineTrackingData } from "@/lib/completion-utils"
+import { useClickSound } from "@/lib/use-click-sound"
 
 interface DisciplineCardProps {
   weekDates: Date[]
@@ -12,6 +13,8 @@ interface DisciplineCardProps {
 }
 
 export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCardProps) {
+  const playClick = useClickSound()
+
   const getDayTracking = (dateStr: string): DisciplineTrackingData | undefined => {
     return tracking.find((t) => t.track_date === dateStr)
   }
@@ -34,10 +37,16 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Checkbox
                       checked={dayTracking?.am_checkin || false}
-                      onCheckedChange={() => onToggle(dateStr, "am_checkin")}
+                      onCheckedChange={() => {
+                        playClick()
+                        onToggle(dateStr, "am_checkin")
+                      }}
                       className="cursor-pointer"
                     />
-                    <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "am_checkin")}>
+                    <span className="cursor-pointer select-none" onClick={() => {
+                      playClick()
+                      onToggle(dateStr, "am_checkin")
+                    }}>
                       AM Check-in
                     </span>
                   </div>
@@ -46,10 +55,16 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Checkbox
                       checked={dayTracking?.pm_checkin || false}
-                      onCheckedChange={() => onToggle(dateStr, "pm_checkin")}
+                      onCheckedChange={() => {
+                        playClick()
+                        onToggle(dateStr, "pm_checkin")
+                      }}
                       className="cursor-pointer"
                     />
-                    <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "pm_checkin")}>
+                    <span className="cursor-pointer select-none" onClick={() => {
+                      playClick()
+                      onToggle(dateStr, "pm_checkin")
+                    }}>
                       PM Check-in
                     </span>
                   </div>
@@ -58,12 +73,16 @@ export function DisciplineCard({ weekDates, tracking, onToggle }: DisciplineCard
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Checkbox
                       checked={dayTracking?.set_goals_tomorrow || false}
-                      onCheckedChange={() =>
+                      onCheckedChange={() => {
+                        playClick()
                         onToggle(dateStr, "set_goals_tomorrow")
-                      }
+                      }}
                       className="cursor-pointer"
                     />
-                    <span className="cursor-pointer select-none" onClick={() => onToggle(dateStr, "set_goals_tomorrow")}>
+                    <span className="cursor-pointer select-none" onClick={() => {
+                      playClick()
+                      onToggle(dateStr, "set_goals_tomorrow")
+                    }}>
                       Set Goals for Tomorrow
                     </span>
                   </div>

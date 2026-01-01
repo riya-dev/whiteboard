@@ -3,6 +3,7 @@
 import { useState, KeyboardEvent } from "react"
 import { Input } from "@/components/ui/input"
 import { X } from "lucide-react"
+import { useClickSound } from "@/lib/use-click-sound"
 
 export interface LookaheadItem {
   id: string
@@ -22,6 +23,7 @@ export function LookaheadList({ items, onAdd, onUpdate, onDelete, placeholder = 
   const [newItemText, setNewItemText] = useState("")
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
+  const playClick = useClickSound()
 
   const handleAdd = () => {
     if (newItemText.trim()) {
@@ -87,7 +89,10 @@ export function LookaheadList({ items, onAdd, onUpdate, onDelete, placeholder = 
             </span>
           )}
           <button
-            onClick={() => onDelete(item.id)}
+            onClick={() => {
+              playClick()
+              onDelete(item.id)
+            }}
             className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 rounded cursor-pointer"
             aria-label="Delete item"
           >
