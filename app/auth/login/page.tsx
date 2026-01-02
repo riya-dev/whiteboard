@@ -25,22 +25,43 @@ export default function LoginPage() {
       const email = formData.get("email") as string
       const password = formData.get("password") as string
 
+      console.log("Starting login for:", email)
       const supabase = createClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      console.log("Supabase client created")
+
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
+      console.log("Sign in response:", { data, error: signInError })
+
       if (signInError) {
+        console.error("Sign in error:", signInError)
         setError(signInError.message)
         setLoading(false)
         return
       }
 
-      // Redirect to dashboard
-      router.push("/dashboard")
-      router.refresh()
+      console.log("Login successful, syncing server cookies and redirecting")
+
+      try {
+        // Explicitly set the session server-side to ensure SSR sees it immediately
+        await fetch('/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_token: data.session?.access_token,
+            refresh_token: data.session?.refresh_token,
+          }),
+        })
+      } catch (e) {
+        console.error('Failed to sync session to server', e)
+      }
+
+      router.replace("/dashboard")
     } catch (err) {
+      console.error("Unexpected error during login:", err)
       setError("An unexpected error occurred")
       setLoading(false)
     }
