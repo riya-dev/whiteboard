@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { X } from "lucide-react"
+import { X, Calendar } from "lucide-react"
 import { LookaheadList, type LookaheadItem } from "./lookahead-list"
-import { getBiweeklyEndMonday, formatBiweeklyEndDate } from "@/lib/date-utils"
+import { formatPeriodRange } from "@/lib/date-utils"
 import { useClickSound } from "@/lib/use-click-sound"
 
 interface WeeklyGoal {
@@ -16,17 +16,21 @@ interface WeeklyGoal {
   is_completed: boolean
   cadence: "weekly" | "biweekly"
   period_start_date: string
+  period_end_date?: string
 }
 
 interface SidebarWeeklyProps {
   // Weekly goals
   weeklyGoals: WeeklyGoal[]
   cadence: "weekly" | "biweekly"
+  periodStartDate: string
+  periodEndDate: string
   onToggleWeeklyGoal: (id: string) => void
-  onAddWeeklyGoal: (text: string) => void
+  onAddWeeklyGoal: (text: string, customStartDate?: string) => void
   onUpdateWeeklyGoal: (id: string, text: string) => void
   onDeleteWeeklyGoal: (id: string) => void
   onCadenceChange: (cadence: "weekly" | "biweekly") => void
+  onUpdatePeriodDates: (newStartDate: string) => void
 
   // Lookahead items
   thisWeekItems: LookaheadItem[]
@@ -39,11 +43,14 @@ interface SidebarWeeklyProps {
 export function SidebarWeekly({
   weeklyGoals,
   cadence,
+  periodStartDate,
+  periodEndDate,
   onToggleWeeklyGoal,
   onAddWeeklyGoal,
   onUpdateWeeklyGoal,
   onDeleteWeeklyGoal,
   onCadenceChange,
+  onUpdatePeriodDates,
   thisWeekItems,
   nextWeekItems,
   onAddLookaheadItem,
@@ -75,11 +82,7 @@ export function SidebarWeekly({
     setEditGoalText("")
   }
 
-  // Calculate biweekly end date if applicable
-  const biweeklyEndDate =
-    cadence === "biweekly" && weeklyGoals.length > 0
-      ? formatBiweeklyEndDate(getBiweeklyEndMonday(weeklyGoals[0].period_start_date))
-      : null
+  const periodDateRange = formatPeriodRange(periodStartDate, periodEndDate)
 
   return (
     <Card className="weekly-sidebar bg-gradient-to-br from-card to-muted/5 border-border/50">
@@ -105,12 +108,21 @@ export function SidebarWeekly({
             </ToggleGroup>
           </div>
 
-          {/* Biweekly end date display */}
-          {biweeklyEndDate && (
-            <p className="text-xs text-muted-foreground mb-3">
-              Goals end {biweeklyEndDate}
-            </p>
-          )}
+          {/* Period date range display */}
+          <div className="mb-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-3 h-3 text-muted-foreground" />
+              <input
+                type="date"
+                value={periodStartDate}
+                onChange={(e) => onUpdatePeriodDates(e.target.value)}
+                className="text-xs bg-transparent border border-border rounded px-2 py-1"
+              />
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {periodDateRange}
+            </span>
+          </div>
 
           {/* Goals list */}
           <div className="space-y-2.5">

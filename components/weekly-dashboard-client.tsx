@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import { getTuesdayWeekStart, getTuesdayWeekDates, formatDate, getLast365Days, getDatesFromStart, isInBiweeklyPeriod } from "@/lib/date-utils"
+import { getWeekStart, getWeekDates, formatDate, getLast365Days, getDatesFromStart, calculatePeriodEndDate } from "@/lib/date-utils"
 import { format } from "date-fns"
 import type { DailyGoalData, DisciplineTrackingData } from "@/lib/completion-utils"
 import { buildDisciplineHeatmapData } from "@/lib/completion-utils"
@@ -40,6 +40,7 @@ interface WeeklyGoal {
   id: string
   user_id: string
   period_start_date: string
+  period_end_date: string
   cadence: "weekly" | "biweekly"
   goal_text: string
   is_completed: boolean
@@ -76,7 +77,8 @@ interface CountdownEvent {
 export default function WeeklyDashboardClient({ user }: { user: User }) {
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getTuesdayWeekStart(new Date()))
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date(), 1))
+  const [weeklyPeriodStart, setWeeklyPeriodStart] = useState<Date>(getWeekStart(new Date(), 1))
 
   // State
   const [dailyGoals, setDailyGoals] = useState<Record<string, DailyGoal[]>>({})
@@ -100,9 +102,28 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     loadData()
   }, [currentWeekStart])
 
+  useEffect(() => {
+    loadWeeklyGoals()
+  }, [weeklyPeriodStart, weeklyGoalsCadence])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const savedCadence = window.localStorage.getItem("weeklyGoalsCadence")
+    if (savedCadence === "weekly" || savedCadence === "biweekly") {
+      setWeeklyGoalsCadence(savedCadence)
+    }
+    const savedPeriodStart = window.localStorage.getItem("weeklyGoalsPeriodStart")
+    if (savedPeriodStart) {
+      const parsed = new Date(savedPeriodStart + "T00:00:00")
+      if (!Number.isNaN(parsed.getTime())) {
+        setWeeklyPeriodStart(parsed)
+      }
+    }
+  }, [])
+
   async function loadData() {
     setLoading(true)
-    const weekDates = getTuesdayWeekDates(currentWeekStart)
+    const weekDates = getWeekDates(currentWeekStart)
     const weekDateStrs = weekDates.map(formatDate)
     const weekStartStr = formatDate(currentWeekStart)
 
@@ -118,33 +139,6 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
       goalsByDate[date] = dailyGoalsData?.filter((g) => g.goal_date === date) || []
     })
     setDailyGoals(goalsByDate)
-
-    // Load weekly goals for this period (including biweekly support)
-    // Fetch goals for this week AND last week (in case of biweekly)
-    const lastWeekStart = new Date(currentWeekStart)
-    lastWeekStart.setDate(currentWeekStart.getDate() - 7)
-    const lastWeekStartStr = formatDate(lastWeekStart)
-
-    const { data: allWeeklyGoalsData } = await supabase
-      .from("weekly_goals")
-      .select("*")
-      .in("period_start_date", [weekStartStr, lastWeekStartStr])
-      .order("goal_order")
-
-    // Filter to show goals that are relevant for current week
-    const relevantGoals = (allWeeklyGoalsData || []).filter((goal) => {
-      if (goal.cadence === "weekly") {
-        return goal.period_start_date === weekStartStr
-      } else {
-        // Biweekly: show if current week is within the 14-day period
-        return isInBiweeklyPeriod(goal.period_start_date, weekStartStr)
-      }
-    })
-
-    setWeeklyGoals(relevantGoals)
-    if (relevantGoals.length > 0) {
-      setWeeklyGoalsCadence(relevantGoals[0].cadence)
-    }
 
     // Load lookahead items for this week
     const { data: lookaheadItemsData } = await supabase
@@ -213,6 +207,18 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     setCountdownEvent(countdownData || null)
 
     setLoading(false)
+  }
+
+  async function loadWeeklyGoals() {
+    const periodStartStr = formatDate(weeklyPeriodStart)
+    const { data } = await supabase
+      .from("weekly_goals")
+      .select("*")
+      .eq("period_start_date", periodStartStr)
+      .eq("cadence", weeklyGoalsCadence)
+      .order("goal_order")
+
+    setWeeklyGoals(data || [])
   }
 
   // ===== DAILY GOALS HANDLERS =====
@@ -306,23 +312,21 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     }
   }
 
-  async function handleAddWeeklyGoal(goalText: string) {
+  async function handleAddWeeklyGoal(goalText: string, customStartDate?: string) {
     if (!goalText.trim()) return
 
     const goalOrder = weeklyGoals.length + 1
-    // Determine period start based on cadence
-    let periodStart = formatDate(currentWeekStart)
+    const periodStart = customStartDate || formatDate(weeklyPeriodStart)
 
-    // If biweekly and we're in week 2, use last week's Tuesday as period start
-    if (weeklyGoalsCadence === "biweekly" && weeklyGoals.length > 0) {
-      periodStart = weeklyGoals[0].period_start_date
-    }
+    // Calculate end date based on start date and cadence
+    const periodEnd = formatDate(calculatePeriodEndDate(periodStart, weeklyGoalsCadence))
 
     const { data, error } = await supabase
       .from("weekly_goals")
       .insert({
         user_id: user.id,
         period_start_date: periodStart,
+        period_end_date: periodEnd,
         cadence: weeklyGoalsCadence,
         goal_text: goalText.trim(),
         goal_order: goalOrder,
@@ -357,35 +361,18 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     }
   }
 
+  async function handleUpdatePeriodDates(newStartDate: string) {
+    if (!newStartDate) return
+    setWeeklyPeriodStart(new Date(newStartDate + "T00:00:00"))
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("weeklyGoalsPeriodStart", newStartDate)
+    }
+  }
+
   async function handleCadenceChange(cadence: "weekly" | "biweekly") {
-    const oldCadence = weeklyGoalsCadence
     setWeeklyGoalsCadence(cadence)
-
-    // When switching cadences, update the period_start_date if needed
-    const weekStartStr = formatDate(currentWeekStart)
-
-    if (oldCadence === "biweekly" && cadence === "weekly") {
-      // Switching from biweekly to weekly: update period_start_date to current week
-      await supabase
-        .from("weekly_goals")
-        .update({ cadence, period_start_date: weekStartStr })
-        .in(
-          "id",
-          weeklyGoals.map((g) => g.id)
-        )
-
-      setWeeklyGoals((prev) => prev.map((g) => ({ ...g, cadence, period_start_date: weekStartStr })))
-    } else {
-      // Just update the cadence
-      await supabase
-        .from("weekly_goals")
-        .update({ cadence })
-        .in(
-          "id",
-          weeklyGoals.map((g) => g.id)
-        )
-
-      setWeeklyGoals((prev) => prev.map((g) => ({ ...g, cadence })))
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("weeklyGoalsCadence", cadence)
     }
   }
 
@@ -593,7 +580,10 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
     return <LoadingWhiteboard />
   }
 
-  const weekDates = getTuesdayWeekDates(currentWeekStart)
+  const weekDates = getWeekDates(currentWeekStart)
+  const weekRangeLabel = `${format(weekDates[0], "MMM d")} - ${format(weekDates[6], "MMM d, yyyy")}`
+  const weeklyPeriodStartStr = formatDate(weeklyPeriodStart)
+  const weeklyPeriodEndStr = formatDate(calculatePeriodEndDate(weeklyPeriodStart, weeklyGoalsCadence))
 
   return (
     <div className="min-h-screen p-4 md:p-8 bg-background relative">
@@ -621,9 +611,14 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
               <div className="flex-1">
                 <Card className="w-full h-14 flex items-center bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
                   <CardContent className="w-full h-full px-4 py-0 flex items-center">
-                    <span className="text-xl md:text-2xl font-medium text-foreground w-full inline-block text-left">
-                      Week of {format(currentWeekStart, "MMMM d, yyyy")}
-                    </span>
+                    <div className="flex flex-col w-full">
+                      <span className="text-xl md:text-2xl font-medium text-foreground inline-block text-left">
+                        Week of {format(currentWeekStart, "MMMM d, yyyy")}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {weekRangeLabel}
+                      </span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -645,11 +640,14 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
                 <SidebarWeekly
                   weeklyGoals={weeklyGoals}
                   cadence={weeklyGoalsCadence}
+                  periodStartDate={weeklyPeriodStartStr}
+                  periodEndDate={weeklyPeriodEndStr}
                   onToggleWeeklyGoal={handleToggleWeeklyGoal}
                   onAddWeeklyGoal={handleAddWeeklyGoal}
                   onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
                   onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
                   onCadenceChange={handleCadenceChange}
+                  onUpdatePeriodDates={handleUpdatePeriodDates}
                   thisWeekItems={thisWeekItems}
                   nextWeekItems={nextWeekItems}
                   onAddLookaheadItem={handleAddLookaheadItem}
@@ -663,11 +661,14 @@ export default function WeeklyDashboardClient({ user }: { user: User }) {
                 <MobileSidebar
                   weeklyGoals={weeklyGoals}
                   cadence={weeklyGoalsCadence}
+                  periodStartDate={weeklyPeriodStartStr}
+                  periodEndDate={weeklyPeriodEndStr}
                   onToggleWeeklyGoal={handleToggleWeeklyGoal}
                   onAddWeeklyGoal={handleAddWeeklyGoal}
                   onUpdateWeeklyGoal={handleUpdateWeeklyGoal}
                   onDeleteWeeklyGoal={handleDeleteWeeklyGoal}
                   onCadenceChange={handleCadenceChange}
+                  onUpdatePeriodDates={handleUpdatePeriodDates}
                   thisWeekItems={thisWeekItems}
                   nextWeekItems={nextWeekItems}
                   onAddLookaheadItem={handleAddLookaheadItem}

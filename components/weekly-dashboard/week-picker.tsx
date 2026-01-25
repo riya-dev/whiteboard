@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { getTuesdayWeekStart, formatWeekDisplay } from "@/lib/date-utils"
+import { getWeekStart, formatWeekDisplay } from "@/lib/date-utils"
 import { CalendarIcon } from "lucide-react"
 
 interface WeekPickerProps {
@@ -16,8 +16,8 @@ export function WeekPicker({ weekStart, onWeekChange }: WeekPickerProps) {
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      const tuesdayStart = getTuesdayWeekStart(date)
-      onWeekChange(tuesdayStart)
+      const alignedStart = getWeekStart(date, weekStart.getDay())
+      onWeekChange(alignedStart)
       setOpen(false)
     }
   }

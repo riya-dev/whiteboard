@@ -9,16 +9,20 @@ interface WeeklyGoal {
   is_completed: boolean
   cadence: "weekly" | "biweekly"
   period_start_date: string
+  period_end_date?: string
 }
 
 interface MobileSidebarProps {
   weeklyGoals: WeeklyGoal[]
   cadence: "weekly" | "biweekly"
+  periodStartDate: string
+  periodEndDate: string
   onToggleWeeklyGoal: (id: string) => void
-  onAddWeeklyGoal: (text: string) => void
+  onAddWeeklyGoal: (text: string, customStartDate?: string) => void
   onUpdateWeeklyGoal: (id: string, text: string) => void
   onDeleteWeeklyGoal: (id: string) => void
   onCadenceChange: (cadence: "weekly" | "biweekly") => void
+  onUpdatePeriodDates: (newStartDate: string) => void
   thisWeekItems: LookaheadItem[]
   nextWeekItems: LookaheadItem[]
   onAddLookaheadItem: (section: "this_week" | "next_week", text: string) => void
