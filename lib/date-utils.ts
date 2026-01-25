@@ -1,6 +1,5 @@
 /**
- * Date utilities for Tuesday-Monday week system
- * All weeks start on Tuesday and end on Monday
+ * Date utilities for configurable week start (legacy default: Tuesday-Monday)
  */
 
 export interface HeatmapDay {
@@ -12,31 +11,44 @@ export interface HeatmapDay {
 }
 
 /**
+ * Get the week start date for the week containing the given date.
+ * @param date - Any date
+ * @param weekStartDay - Day of week to start on (0=Sun, 1=Mon, ..., 6=Sat)
+ * @returns The start date for that week
+ */
+export function getWeekStart(date: Date, weekStartDay: number): Date {
+  const d = new Date(date)
+  const day = d.getDay()
+  const daysBack = (day - weekStartDay + 7) % 7
+
+  const weekStart = new Date(d)
+  weekStart.setDate(d.getDate() - daysBack)
+  weekStart.setHours(0, 0, 0, 0)
+  return weekStart
+}
+
+/**
  * Get the Tuesday that starts the week containing the given date
  * @param date - Any date
  * @returns The Tuesday that starts that week
  */
 export function getTuesdayWeekStart(date: Date): Date {
-  const d = new Date(date)
-  const day = d.getDay() // 0 = Sunday, 1 = Monday, 2 = Tuesday, etc.
+  return getWeekStart(date, 2)
+}
 
-  // Calculate days to go back to Tuesday
-  let daysBack: number
-  if (day === 0) {
-    // Sunday - go back 5 days to Tuesday
-    daysBack = 5
-  } else if (day === 1) {
-    // Monday - go back 6 days to last Tuesday
-    daysBack = 6
-  } else {
-    // Tuesday-Saturday - go back to this week's Tuesday
-    daysBack = day - 2
+/**
+ * Get all 7 dates for a week starting from the week start date
+ * @param weekStart - The date that starts the week
+ * @returns Array of 7 dates from week start through week end
+ */
+export function getWeekDates(weekStart: Date): Date[] {
+  const dates: Date[] = []
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(weekStart)
+    date.setDate(weekStart.getDate() + i)
+    dates.push(date)
   }
-
-  const tuesday = new Date(d)
-  tuesday.setDate(d.getDate() - daysBack)
-  tuesday.setHours(0, 0, 0, 0)
-  return tuesday
+  return dates
 }
 
 /**
@@ -45,13 +57,7 @@ export function getTuesdayWeekStart(date: Date): Date {
  * @returns Array of 7 dates [Tue, Wed, Thu, Fri, Sat, Sun, Mon]
  */
 export function getTuesdayWeekDates(weekStart: Date): Date[] {
-  const dates: Date[] = []
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(weekStart)
-    date.setDate(weekStart.getDate() + i)
-    dates.push(date)
-  }
-  return dates
+  return getWeekDates(weekStart)
 }
 
 /**
@@ -212,8 +218,8 @@ export function getDayOfWeekLabels(): string[] {
 
 /**
  * Navigate to previous week (7 days back)
- * @param currentWeekStart - Current Tuesday week start
- * @returns Previous Tuesday
+ * @param currentWeekStart - Current week start
+ * @returns Previous week start
  */
 export function getPreviousWeek(currentWeekStart: Date): Date {
   const prevWeek = new Date(currentWeekStart)
@@ -223,8 +229,8 @@ export function getPreviousWeek(currentWeekStart: Date): Date {
 
 /**
  * Navigate to next week (7 days forward)
- * @param currentWeekStart - Current Tuesday week start
- * @returns Next Tuesday
+ * @param currentWeekStart - Current week start
+ * @returns Next week start
  */
 export function getNextWeek(currentWeekStart: Date): Date {
   const nextWeek = new Date(currentWeekStart)
@@ -235,19 +241,19 @@ export function getNextWeek(currentWeekStart: Date): Date {
 /**
  * Check if a date falls within a given week
  * @param date - Date to check
- * @param weekStart - Tuesday that starts the week
+ * @param weekStart - Week start date
  * @returns True if date is in the week
  */
 export function isDateInWeek(date: Date, weekStart: Date): boolean {
-  const weekDates = getTuesdayWeekDates(weekStart)
+  const weekDates = getWeekDates(weekStart)
   const dateStr = formatDate(date)
   return weekDates.some((d) => formatDate(d) === dateStr)
 }
 
 /**
  * Check if current week is within a biweekly period
- * @param goalPeriodStart - The Tuesday that starts the biweekly period (from database)
- * @param currentWeekStart - The Tuesday of the week being viewed
+ * @param goalPeriodStart - The start date of the biweekly period (from database)
+ * @param currentWeekStart - The week start being viewed
  * @returns True if current week is in week 1 or week 2 of the biweekly period
  */
 export function isInBiweeklyPeriod(goalPeriodStart: Date | string, currentWeekStart: Date | string): boolean {
@@ -276,6 +282,76 @@ export function getBiweeklyEndMonday(periodStartTuesday: Date | string): Date {
   const monday = new Date(tuesday)
   monday.setDate(tuesday.getDate() + 13) // Tuesday + 13 days = Monday of week 2
   return monday
+}
+
+/**
+ * Calculate the end date for a goal period based on start date and cadence
+ * Weekly: end date is 6 days after start (e.g., Monday to Sunday)
+ * Biweekly: end date is 13 days after start (e.g., Monday to Sunday of week 2)
+ * @param startDate - The start date of the period
+ * @param cadence - "weekly" or "biweekly"
+ * @returns The end date of the period
+ */
+export function calculatePeriodEndDate(startDate: Date | string, cadence: "weekly" | "biweekly"): Date {
+  const start = typeof startDate === "string" ? parseDate(startDate) : new Date(startDate)
+  const endDate = new Date(start)
+  const daysToAdd = cadence === "weekly" ? 6 : 13
+  endDate.setDate(start.getDate() + daysToAdd)
+  return endDate
+}
+
+/**
+ * Get all dates in a goal period from start to end
+ * @param startDate - The start date of the period
+ * @param endDate - The end date of the period
+ * @returns Array of dates from start to end (inclusive)
+ */
+export function getPeriodDates(startDate: Date | string, endDate: Date | string): Date[] {
+  const start = typeof startDate === "string" ? parseDate(startDate) : new Date(startDate)
+  const end = typeof endDate === "string" ? parseDate(endDate) : new Date(endDate)
+  const dates: Date[] = []
+
+  const current = new Date(start)
+  while (current <= end) {
+    dates.push(new Date(current))
+    current.setDate(current.getDate() + 1)
+  }
+  return dates
+}
+
+/**
+ * Check if a date falls within a goal period
+ * @param date - Date to check
+ * @param periodStart - Start of the goal period
+ * @param periodEnd - End of the goal period
+ * @returns True if date is within the period (inclusive)
+ */
+export function isDateInGoalPeriod(date: Date | string, periodStart: Date | string, periodEnd: Date | string): boolean {
+  const d = typeof date === "string" ? parseDate(date) : new Date(date)
+  const start = typeof periodStart === "string" ? parseDate(periodStart) : new Date(periodStart)
+  const end = typeof periodEnd === "string" ? parseDate(periodEnd) : new Date(periodEnd)
+
+  d.setHours(0, 0, 0, 0)
+  start.setHours(0, 0, 0, 0)
+  end.setHours(0, 0, 0, 0)
+
+  return d >= start && d <= end
+}
+
+/**
+ * Format a period date range for display
+ * @param startDate - Start date of the period
+ * @param endDate - End date of the period
+ * @returns Formatted string like "Jan 19 - Jan 25"
+ */
+export function formatPeriodRange(startDate: Date | string, endDate: Date | string): string {
+  const start = typeof startDate === "string" ? parseDate(startDate) : new Date(startDate)
+  const end = typeof endDate === "string" ? parseDate(endDate) : new Date(endDate)
+
+  const startStr = start.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  const endStr = end.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+
+  return `${startStr} - ${endStr}`
 }
 
 /**
